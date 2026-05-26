@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindSync | Holographic EEG Dashboard</title>
+  <meta name="description" content="Ultra-premium real-time EEG visualizer and high-frequency data logger. Fully optimized for BioAMP EXG Pill.">
+  
+  <!-- Premium Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ─── Modern Theme Tokens ───────────────────────────────────────────── */
+    :root {
+      --bg: #030308;
+      --surface: rgba(15, 15, 30, 0.45);
+      --surface-hover: rgba(25, 25, 45, 0.6);
+      --border: rgba(255, 255, 255, 0.05);
+      --border-glow: rgba(124, 111, 247, 0.2);
+      
+      --t1: #f3f3fb;
+      --t2: rgba(243, 243, 251, 0.65);
+      --t3: rgba(243, 243, 251, 0.35);
+
+      --delta: #7c6ff7;   /* Cyber Indigo */
+      --theta: #00d4ff;   /* Neon Cyan */
+      --alpha: #22f5a0;   /* Bright Mint */
+      --beta:  #ffc200;   /* Sunset Amber */
+      --gamma: #ff4b6e;   /* Crimson Rose */
+      
+      --glow-delta: 0 0 16px rgba(124, 111, 247, 0.35);
+      --glow-theta: 0 0 16px rgba(0, 212, 255, 0.35);
+      --glow-alpha: 0 0 16px rgba(34, 245, 160, 0.35);
+      --glow-beta:  0 0 16px rgba(255, 194, 0, 0.35);
+      --glow-gamma: 0 0 16px rgba(255, 75, 110, 0.35);
+    }
+
+    /* ─── Ambient Glowing Backgrounds ───────────────────────────────────── */
+    body::before, body::after {
+      content: ''; position: fixed; border-radius: 50%;
+      pointer-events: none; z-index: 0;
+      filter: blur(140px);
+      transition: background 0.8s ease;
+    }
+    body::before {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(124,111,247,0.06) 0%, transparent 70%);
+      top: -200px; left: -200px;
+    }
+    body::after {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(0,212,255,0.04) 0%, transparent 70%);
+      bottom: -150px; right: -150px;
+    }
+
+    /* ─── Reset & Scrollbars ────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--t1); }
+    body {
+      font-family: 'Inter', sans-serif;
+      display: flex; flex-direction: column;
+      position: relative;
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+
+    /* ─── Glassmorphism Panels ──────────────────────────────────────────── */
+    .glass-panel {
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ─── Ultra-Premium Header ──────────────────────────────────────────── */
+    .hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; height: 70px;
+      background: rgba(3, 3, 8, 0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 10; flex-shrink: 0;
+    }
+    .logo-container { display: flex; align-items: center; gap: 14px; }
+    .logo-icon {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--delta), var(--theta));
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
+      box-shadow: var(--glow-delta);
+      animation: logo-glow 3s infinite alternate;
+    }
+    @keyframes logo-glow {
+      from { box-shadow: 0 0 10px rgba(124,111,247,0.3); }
+      to { box-shadow: 0 0 20px rgba(0,212,255,0.5); }
+    }
+    .logo-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px; font-weight: 800; letter-spacing: -0.5px;
+      background: linear-gradient(90deg, #fff, var(--t2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .logo-badge {
+      font-size: 9px; font-family: 'JetBrains Mono', monospace;
+      color: var(--theta); border: 1px solid rgba(0, 212, 255, 0.25);
+      padding: 2px 7px; border-radius: 6px; letter-spacing: 1px;
+      background: rgba(0, 212, 255, 0.05); margin-left: 10px;
+    }
+
+    .hdr-controls { display: flex; align-items: center; gap: 12px; }
+
+    /* ─── Pulsing Status Pill ───────────────────────────────────────────── */
+    .status-pill {
+      display: flex; align-items: center; gap: 9px;
+      padding: 6px 14px; border-radius: 24px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.02);
+      font-size: 11px; color: var(--t2); font-family: 'JetBrains Mono', monospace;
+    }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #333; transition: all 0.3s;
+    }
+    .dot.on { background: var(--alpha); box-shadow: var(--glow-alpha); }
+    .dot.pulse { background: var(--beta); animation: blink 1.2s infinite; }
+    @keyframes blink { 50% { opacity: 0.2; } }
+
+    /* ─── Premium Futuristic Buttons ─────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 18px; border-radius: 10px; border: 1px solid var(--border);
+      font: 600 13px 'Outfit', sans-serif; cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap; color: var(--t1);
+    }
+    .btn:disabled { opacity: 0.3; pointer-events: none; }
+    
+    .btn-grad {
+      background: linear-gradient(135deg, var(--delta), var(--theta));
+      border: none; color: #fff;
+    }
+    .btn-grad:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(124, 111, 247, 0.45);
+      filter: brightness(1.1);
+    }
+    .btn-grad:active { transform: translateY(0); }
+
+    .btn-ghost {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: var(--t2);
+    }
+    .btn-ghost:hover {
+      background: rgba(255,255,255,0.06); color: #fff; border-color: rgba(255,255,255,0.12);
+      transform: translateY(-2px);
+    }
+    .btn-ghost:active { transform: translateY(0); }
+
+    .btn-rec {
+      background: rgba(255, 75, 110, 0.08); color: var(--gamma); border: 1px solid rgba(255, 75, 110, 0.2);
+    }
+    .btn-rec.active {
+      background: var(--gamma); color: #fff; border-color: var(--gamma);
+      box-shadow: var(--glow-gamma);
+      animation: heart-beat 1.5s infinite alternate;
+    }
+    @keyframes heart-beat {
+      from { filter: brightness(1); }
+      to { filter: brightness(1.15); }
+    }
+
+    .btn-dl {
+      background: rgba(34, 245, 160, 0.08); color: var(--alpha); border: 1px solid rgba(34, 245, 160, 0.2);
+    }
+    .btn-dl:hover {
+      background: rgba(34, 245, 160, 0.16); box-shadow: var(--glow-alpha);
+    }
+
+    /* ─── Layout Grid Architecture (Strict Viewport Constrained) ────────── */
+    .dashboard-layout {
+      height: calc(100vh - 70px);
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      grid-template-rows: auto 1fr auto;
+      padding: 16px; gap: 16px;
+      overflow: hidden; position: relative; z-index: 1;
+    }
+
+    /* ─── Premium Glassmorphic Stats Grid (Compact Viewport Fit) ───────── */
+    .stats-container {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .stat-card {
+      background: rgba(13, 13, 27, 0.35);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px 14px;
+      display: flex; flex-direction: column; gap: 2px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative; overflow: hidden;
+    }
+    .stat-card:hover {
+      background: rgba(25, 25, 45, 0.5);
+      border-color: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+    .stat-card::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%;
+      background: var(--accent, var(--delta));
+    }
+    .stat-lbl { font-size: 9px; color: var(--t3); text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600; }
+    .stat-val-group { display: flex; align-items: baseline; gap: 3px; }
+    .stat-val { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: var(--t1); }
+    .stat-unit { font-size: 10px; color: var(--t3); font-weight: 500; }
+
+    /* ─── Primary Waveform Console ─────────────────────────────────────── */
+    .wave-console {
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      min-height: 0; /* allows grid item to shrink and scale dynamically */
+    }
+    .console-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 16px; border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.015);
+      flex-shrink: 0;
+    }
+    .console-title { font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; }
+    .console-tools { display: flex; align-items: center; gap: 8px; }
+    
+    .custom-select {
+      background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border);
+      color: var(--t1); padding: 4px 8px; border-radius: 6px;
+      font: 500 11px 'Outfit', sans-serif; cursor: pointer; outline: none;
+      transition: all 0.2s;
+    }
+    .custom-select:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); }
+
+    .canvas-container {
+      flex: 1; width: 100%; position: relative; overflow: hidden;
+      background: rgba(2, 2, 6, 0.6);
+      min-height: 0;
+    }
+    #eegCanvas { display: block; width: 100%; height: 100%; }
+
+    /* ─── Advanced Side Panel ───────────────────────────────────────────── */
+    .side-panel {
+      display: flex; flex-direction: column; gap: 14px;
+      overflow: hidden; /* no panel-level scrollbar */
+      height: 100%; min-height: 0;
+    }
+    .side-card {
+      padding: 12px 16px;
+      display: flex; flex-direction: column;
+    }
+    
+    /* Dynamic Pulsing Orb */
+    .dominant-orb-wrapper {
+      position: relative; display: flex; flex-direction: column; align-items: center;
+      padding: 4px 0; border-bottom: 1px solid var(--border); margin-bottom: 10px;
+    }
+    .dominant-orb-container {
+      width: 70px; height: 70px; margin-bottom: 8px;
+      position: relative; display: flex; align-items: center; justify-content: center;
+    }
+    .orb-pulse {
+      position: absolute; width: 66px; height: 66px; border-radius: 50%;
+      background: radial-gradient(circle, var(--accent, var(--delta)) 0%, transparent 70%);
+      opacity: 0.25; animation: orb-pulse 2s infinite ease-in-out;
+      transition: background 0.8s ease, box-shadow 0.8s ease;
+    }
+    @keyframes orb-pulse {
+      0% { transform: scale(0.95); opacity: 0.2; }
+      50% { transform: scale(1.3); opacity: 0.55; }
+      100% { transform: scale(0.95); opacity: 0.2; }
+    }
+    .orb-core {
+      font-size: 30px; z-index: 1;
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
+      animation: core-hover 3s infinite ease-in-out;
+    }
+    @keyframes core-hover {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    .dominant-name {
+      font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: -0.5px;
+      transition: color 0.5s ease; text-shadow: 0 0 10px rgba(255,255,255,0.05);
+    }
+    .dominant-desc { font-size: 11px; color: var(--t2); text-align: center; margin-top: 2px; }
+    .dominant-hz { font-size: 10px; color: var(--t3); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+
+    /* Live Spectral Power Bars */
+    .spectral-rows {
+      display: flex; flex-direction: column; gap: 10px;
+      overflow-y: auto; flex: 1; /* only power bars scroll internally if squished */
+      padding-right: 2px;
+    }
+    .spect-row {}
+    .spect-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+    .spect-name { font-size: 11px; font-weight: 600; font-family: 'Outfit', sans-serif; }
+    .spect-hz { font-size: 9px; color: var(--t3); font-weight: 400; margin-left: 3px; }
+    .spect-val { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500; }
+    .spect-bar-track { height: 5px; border-radius: 2.5px; background: rgba(255,255,255,0.04); overflow: hidden; }
+    .spect-bar-fill { height: 100%; border-radius: 2.5px; transition: width 0.1s linear, box-shadow 0.3s; }
+
+    /* ─── Collapsible Interactive Terminal Console ──────────────────────── */
+    .terminal-panel {
+      grid-column: 1 / -1;
+      display: flex; flex-direction: column;
+      height: 40px;
+      transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .terminal-panel.expanded { height: 180px; }
+    
+    .terminal-bar {
+      height: 40px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; cursor: pointer; flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.015); border-bottom: 1px solid var(--border);
+    }
+    .terminal-bar:hover { background: rgba(255, 255, 255, 0.03); }
+    .terminal-title {
+      font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; gap: 8px; color: var(--t2);
+    }
+    .terminal-pulse {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--alpha); animation: terminal-blink 1s infinite alternate;
+    }
+    @keyframes terminal-blink { from { opacity: 0.3; } to { opacity: 1; } }
+
+    .terminal-wrap {
+      flex: 1; overflow-y: auto; font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; background: rgba(1, 1, 3, 0.8);
+    }
+    
+    /* Terminal Table Styling */
+    .term-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .term-table th {
+      padding: 8px 16px; border-bottom: 1px solid var(--border);
+      font-size: 10px; text-transform: uppercase; color: var(--t3); letter-spacing: 1px;
+      position: sticky; top: 0; background: rgba(3, 3, 8, 0.95); z-index: 5;
+    }
+    .term-table td { padding: 7px 16px; border-bottom: 1px solid rgba(255,255,255,0.01); color: var(--t2); }
+    .term-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    /* Browser compatibility warning */
+    #noSerial {
+      display: none;
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: rgba(255, 194, 0, 0.1); border: 1px solid rgba(255, 194, 0, 0.25);
+      border-radius: 12px; padding: 14px 24px; font-size: 13px; color: var(--beta);
+      backdrop-filter: blur(12px); z-index: 1000; text-align: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── ULTRA-PREMIUM HEADER ────────────────────────────────────────────────── -->
+<header class="hdr">
+  <div class="logo-container">
+    <div class="logo-icon">🧠</div>
+    <div>
+      <div class="logo-title">MindSync</div>
+      <div style="display:flex;align-items:center;">
+        <span style="font-size:10px;color:var(--t3);font-family:'Outfit',sans-serif;font-weight:500;">BIOAMP EXG AMPLIFIER</span>
+        <span class="logo-badge">3-ELECTRODE</span>
+      </div>
+    </div>
+  </div>
+  <div class="hdr-controls">
+    <div class="status-pill">
+      <span class="dot" id="dot"></span>
+      <span id="statusTxt">Offline</span>
+    </div>
+    <button class="btn btn-ghost" id="simBtn" onclick="triggerFileSelect()">📂 Load simulation file</button>
+    <input type="file" id="fileInput" accept=".txt,.csv" style="display:none" onchange="loadSimulationFile(event)">
+    <button class="btn btn-grad" id="connectBtn" onclick="toggleConnect()">⚡ Connect Arduino</button>
+  </div>
+</header>
+
+<!-- ─── PRIMARY DASHBOARD GRID ──────────────────────────────────────────────── -->
+<div class="dashboard-layout">
+
+  <!-- Gorgeous Stats Row -->
+  <div class="stats-container">
+    <div class="stat-card" style="--accent:var(--delta)">
+      <span class="stat-lbl">Sample Rate</span>
+      <div class="stat-val-group">
+        <span class="stat-val" style="color:var(--delta)">256</span>
+        <span class="stat-unit">Hz</span>
+      </div>
+    </div>
+    <div class="stat-card" style="--accent:var(--theta)">
+      <span class="stat-lbl">Samples Streamed</span>
+      <div class="stat-val-group">
+        <span class="stat-val" id="sSamples">0</span>
+        <span class="stat-unit">raw</span>
+      </div>
+    </div>
+    <div class="stat-card" style="--accent:var(--gamma)">
+      <span class="stat-lbl">Artifacts Rejected</span>
+      <div class="stat-val-group">
+        <span class="stat-val" id="sArt" style="color:var(--gamma)">0</span>
+        <span class="stat-unit">spikes</span>
+      </div>
+    </div>
+    <div class="stat-card" style="--accent:var(--alpha)">
+      <span class="stat-lbl">Session Clock</span>
+      <div class="stat-val-group">
+        <span class="stat-val" id="sTime">00:00</span>
+        <span class="stat-unit">mm:ss</span>
+      </div>
+    </div>
+    <div class="stat-card" style="--accent:var(--alpha)">
+      <span class="stat-lbl">High-Fi Logs</span>
+      <div class="stat-val-group">
+        <span class="stat-val" id="sLogged" style="color:var(--alpha)">0</span>
+        <span class="stat-unit">rows</span>
+      </div>
+    </div>
+    <div class="stat-card" style="--accent:var(--beta)">
+      <span class="stat-lbl">Dominant Wave</span>
+      <div class="stat-val-group">
+        <span class="stat-val" id="sDom" style="color:var(--t3)">–</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real-Time Waveform visualizer Column -->
+  <div class="wave-console glass-panel">
+    <div class="console-header">
+      <div>
+        <div class="console-title" style="font-family:'Outfit',sans-serif;font-weight:700;letter-spacing:-0.2px;">Interactive Spectral Oscilloscope</div>
+        <div style="font-size:10px;color:var(--t3);font-family:'Outfit',sans-serif;margin-top:2px;">Real-time decomposition & digital filtering</div>
+      </div>
+      <div class="console-tools">
+        <select class="custom-select" id="layoutSel" onchange="setLayout(this.value)" style="margin-right:4px;">
+          <option value="split" selected>Split view (5 Panels)</option>
+          <option value="overlay">Overlay view (Oscilloscope)</option>
+        </select>
+        <select class="custom-select" id="winSel" onchange="setWindow(this.value)">
+          <option value="512">2 s Frame</option>
+          <option value="1280" selected>5 s Frame</option>
+          <option value="2560">10 s Frame</option>
+          <option value="7680">30 s Frame</option>
+        </select>
+      </div>
+    </div>
+    <div class="canvas-container">
+      <canvas id="eegCanvas"></canvas>
+    </div>
+  </div>
+
+  <!-- Dynamic Control & Spectral Analysis Side Panel -->
+  <div class="side-panel">
+    
+    <!-- Dominant Band Glowing Orb -->
+    <div class="side-card glass-panel" style="align-items:center;text-align:center;flex-shrink:0;">
+      <div class="dominant-orb-wrapper">
+        <div class="dominant-orb-container">
+          <div class="orb-pulse" id="orbPulse"></div>
+          <div class="orb-core">🧠</div>
+        </div>
+        <span style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:2px;font-weight:700;">Holographic State</span>
+      </div>
+      <div class="dominant-name" id="domName" style="color:var(--t3)">–</div>
+      <div class="dominant-desc" id="domDesc">System inactive</div>
+      <div class="dominant-hz" id="domFreq"></div>
+    </div>
+
+    <!-- Live Spectral Density Grid -->
+    <div class="side-card glass-panel" style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;">
+      <span style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:2px;font-weight:700;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:14px;flex-shrink:0;">Spectral Density (RMS)</span>
+      <div class="spectral-rows" id="bandRows"></div>
+    </div>
+
+    <!-- Data Logger Glass Card -->
+    <div class="side-card glass-panel" style="gap:12px;flex-shrink:0;">
+      <span style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:2px;font-weight:700;border-bottom:1px solid var(--border);padding-bottom:10px;">Logger Operations</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-rec" id="recBtn" onclick="toggleRec()" disabled style="flex:1;justify-content:center;">⏺ Record</button>
+        <button class="btn btn-dl"  id="dlBtn"  onclick="downloadCSV()" disabled style="flex:1;justify-content:center;">⬇ CSV</button>
+        <button class="btn btn-ghost" id="clrBtn" onclick="clearLog()" disabled style="padding:8px 12px;">🗑</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Collapsible Holographic Terminal Console -->
+  <div class="terminal-panel glass-panel" id="termPanel">
+    <div class="terminal-bar" onclick="toggleTerminal()">
+      <div class="terminal-title">
+        <span class="terminal-pulse"></span>
+        <span>Holographic Console Log Stream</span>
+      </div>
+      <div id="termStatus" style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--t3);">Collapsed (Click to toggle)</div>
+    </div>
+    <div class="terminal-wrap" id="tblWrap">
+      <table class="term-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Offset (ms)</th>
+            <th>Raw Signal</th>
+            <th style="color:var(--delta)">Delta (🟣)</th>
+            <th style="color:var(--theta)">Theta (🔵)</th>
+            <th style="color:var(--alpha)">Alpha (🟢)</th>
+            <th style="color:var(--beta)">Beta (🟡)</th>
+            <th style="color:var(--gamma)">Gamma (🔴)</th>
+            <th>State</th>
+          </tr>
+        </thead>
+        <tbody id="logBody">
+          <tr>
+            <td colspan="9" style="text-align:center;color:var(--t3);padding:24px;font-size:12px;">
+              Console ready. Connect your sensor or load a simulator file to stream data logs.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div id="noSerial">⚠️ Web Serial API requires <strong>Google Chrome</strong> or <strong>Microsoft Edge</strong> (v89+). Please run the dashboard in a supported browser.</div>
+
+<!-- ─── DASHBOARD LOGIC ENGINE ────────────────────────────────────────────── -->
+<script>
+'use strict';
+
+/* ─── Band Metadata with Premium Color Tokens ───────────────────────────── */
+const BANDS = [
+  { key:'delta', name:'Delta', hz:'0.5–4 Hz',  color:'#7c6ff7', desc:'Deep Sleep / Healing',    flo:0.5, fhi:4   },
+  { key:'theta', name:'Theta', hz:'4–8 Hz',    color:'#00d4ff', desc:'Drowsy / Meditating',     flo:4,   fhi:8   },
+  { key:'alpha', name:'Alpha', hz:'8–12 Hz',   color:'#22f5a0', desc:'Relaxed / Calm State',    flo:8,   fhi:12  },
+  { key:'beta',  name:'Beta',  hz:'12–30 Hz',  color:'#ffc200', desc:'Alert / High Focus',      flo:12,  fhi:30  },
+  { key:'gamma', name:'Gamma', hz:'30–44 Hz',  color:'#ff4b6e', desc:'Problem Solving',         flo:30,  fhi:44  },
+];
+
+/* ─── IIR Cascade Filters for Band Decomposition ────────────────────────── */
+const FS = 256;
+
+class LP {
+  constructor(fc) { this.a = Math.exp(-2 * Math.PI * fc / FS); this.y = 0; }
+  step(x) { return (this.y = (1 - this.a) * x + this.a * this.y); }
+  reset()  { this.y = 0; }
+}
+
+const lps = [0.5, 4, 8, 12, 30, 44].map(f => new LP(f));
+
+function extractBands(x) {
+  const [l05, l4, l8, l12, l30, l44] = lps.map(lp => lp.step(x));
+  return {
+    delta: l4  - l05,
+    theta: l8  - l4,
+    alpha: l12 - l8,
+    beta:  l30 - l12,
+    gamma: l44 - l30,
+  };
+}
+
+/* ─── Ring Buffer for Oscilloscope Visualization ────────────────────────── */
+class Ring {
+  constructor(n) { this.buf = new Float32Array(n); this.n = n; this.p = 0; this.len = 0; }
+  push(v) { this.buf[this.p] = v; this.p = (this.p + 1) % this.n; if (this.len < this.n) this.len++; }
+  at(i)   { return this.buf[(this.p - this.len + i + this.n * 2) % this.n]; }
+  rms(k)  { k = Math.min(k, this.len); let s = 0; for (let i = this.len - k; i < this.len; i++) { const v = this.at(i); s += v*v; } return Math.sqrt(s / (k||1)); }
+}
+
+const MAX_BUF = 7680;
+const bufs = {};
+BANDS.forEach(b => bufs[b.key] = new Ring(MAX_BUF));
+
+/* ─── Interactive Spectral Canvas Engine ────────────────────────────────── */
+const canvas = document.getElementById('eegCanvas');
+const ctx    = canvas.getContext('2d');
+let W = 0, H = 0, windowN = 1280, layoutMode = 'split';
+
+function resize() {
+  const r = canvas.parentElement.getBoundingClientRect();
+  W = canvas.width  = Math.floor(r.width);
+  H = canvas.height = Math.floor(r.height);
+}
+new ResizeObserver(resize).observe(canvas.parentElement);
+resize();
+
+function hexRgba(hex, a) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function drawFrame() {
+  ctx.clearRect(0, 0, W, H);
+  
+  if (layoutMode === 'split') {
+    drawSplitFrame();
+  } else {
+    drawOverlayFrame();
+  }
+}
+
+// Layout Mode A: Split screen 5 stacked panels (Highly structured)
+function drawSplitFrame() {
+  const LABEL = 84;
+  const PW    = W - LABEL;
+  const pH    = H / BANDS.length;
+
+  BANDS.forEach((b, bi) => {
+    const yT  = bi * pH;
+    const yM  = yT + pH / 2;
+    const yB  = yT + pH;
+    const ring = bufs[b.key];
+    const N    = windowN;
+
+    /* Panel dividers */
+    if (bi > 0) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+      ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, yT); ctx.lineTo(W, yT); ctx.stroke();
+    }
+
+    /* Left labels */
+    ctx.fillStyle = hexRgba(b.color, 0.03);
+    ctx.fillRect(0, yT, LABEL, pH);
+
+    ctx.fillStyle = b.color;
+    ctx.font = '700 12px Outfit, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(b.name.toUpperCase(), LABEL/2, yM - 4);
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '500 9px JetBrains Mono, monospace';
+    ctx.fillText(b.hz, LABEL/2, yM + 9);
+
+    /* Zero Centerline */
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx.setLineDash([3, 5]);
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(LABEL, yM); ctx.lineTo(W, yM); ctx.stroke();
+    ctx.setLineDash([]);
+
+    /* Vertical grid guidelines */
+    [.25,.5,.75].forEach(f => {
+      ctx.strokeStyle = 'rgba(255,255,255,0.015)';
+      ctx.beginPath(); ctx.moveTo(LABEL + PW * f, yT); ctx.lineTo(LABEL + PW * f, yB); ctx.stroke();
+    });
+
+    const avail = Math.min(ring.len, N);
+    if (avail < 2) {
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx.font = '500 11px Outfit, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('WAITING FOR SIGNAL…', LABEL + PW/2, yM + 4);
+      return;
+    }
+
+    // Dynamic wave scaling
+    let maxA = 0.8;
+    for (let i = ring.len - avail; i < ring.len; i++) {
+      const a = Math.abs(ring.at(i)); if (a > maxA) maxA = a;
+    }
+    const scale = (pH * 0.44) / maxA;
+
+    /* Waves backfill gradient */
+    ctx.beginPath();
+    ctx.moveTo(LABEL, yM);
+    for (let i = 0; i < avail; i++) {
+      const x = LABEL + (i / (avail - 1)) * PW;
+      const y = yM - ring.at(ring.len - avail + i) * scale;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(LABEL + PW, yM);
+    ctx.closePath();
+    ctx.fillStyle = hexRgba(b.color, 0.05);
+    ctx.fill();
+
+    /* Beautiful Glowing Line rendering */
+    ctx.beginPath();
+    for (let i = 0; i < avail; i++) {
+      const x = LABEL + (i / (avail - 1)) * PW;
+      const y = yM - ring.at(ring.len - avail + i) * scale;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.shadowColor = b.color;
+    ctx.shadowBlur  = 6;
+    ctx.strokeStyle = b.color;
+    ctx.lineWidth   = 2.0;
+    ctx.stroke();
+    ctx.shadowBlur  = 0; // reset shadow immediately
+
+    /* Dynamic leading dot */
+    const lastY = yM - ring.at(ring.len - 1) * scale;
+    const lastX = LABEL + PW;
+    ctx.beginPath(); ctx.arc(lastX, lastY, 3, 0, Math.PI*2);
+    ctx.fillStyle = b.color; ctx.fill();
+    ctx.beginPath(); ctx.arc(lastX, lastY, 7, 0, Math.PI*2);
+    ctx.fillStyle = hexRgba(b.color, 0.25); ctx.fill();
+  });
+  
+  drawTimeAxis(LABEL, W - LABEL);
+}
+
+// Layout Mode B: Overlay multichannel view (Scope style)
+function drawOverlayFrame() {
+  const LABEL = 84;
+  const PW    = W - LABEL;
+  const N     = windowN;
+
+  /* Left label column */
+  ctx.fillStyle = 'rgba(255,255,255,0.015)';
+  ctx.fillRect(0, 0, LABEL, H);
+  
+  ctx.fillStyle = '#fff';
+  ctx.font = '700 13px Outfit, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText("OVERLAY", LABEL/2, H/2 - 6);
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.font = '500 9px JetBrains Mono, monospace';
+  ctx.fillText("5-CHANNELS", LABEL/2, H/2 + 8);
+
+  /* Horizontal grid lines */
+  [0.2, 0.4, 0.6, 0.8].forEach(f => {
+    ctx.strokeStyle = 'rgba(255,255,255,0.025)';
+    ctx.beginPath(); ctx.moveTo(LABEL, H * f); ctx.lineTo(W, H * f); ctx.stroke();
+  });
+
+  /* Vertical time grid */
+  [.25,.5,.75].forEach(f => {
+    ctx.strokeStyle = 'rgba(255,255,255,0.015)';
+    ctx.beginPath(); ctx.moveTo(LABEL + PW * f, 0); ctx.lineTo(LABEL + PW * f, H); ctx.stroke();
+  });
+
+  // Plot each active wave band overlaid
+  BANDS.forEach((b, bi) => {
+    const ring = bufs[b.key];
+    const avail = Math.min(ring.len, N);
+    if (avail < 2) return;
+
+    // Calculate vertical offset center points for each band to distribute them nicely
+    const centerY = H * (0.16 + bi * 0.17);
+
+    let maxA = 0.8;
+    for (let i = ring.len - avail; i < ring.len; i++) {
+      const a = Math.abs(ring.at(i)); if (a > maxA) maxA = a;
+    }
+    const scale = (H * 0.12) / maxA; // scaled smaller to prevent panel bleed-through
+
+    /* Drawing clean line */
+    ctx.beginPath();
+    for (let i = 0; i < avail; i++) {
+      const x = LABEL + (i / (avail - 1)) * PW;
+      const y = centerY - ring.at(ring.len - avail + i) * scale;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.shadowColor = b.color;
+    ctx.shadowBlur  = 4;
+    ctx.strokeStyle = b.color;
+    ctx.lineWidth   = 1.8;
+    ctx.stroke();
+    ctx.shadowBlur  = 0;
+
+    /* Leading dot */
+    const lastY = centerY - ring.at(ring.len - 1) * scale;
+    const lastX = LABEL + PW;
+    ctx.beginPath(); ctx.arc(lastX, lastY, 2.5, 0, Math.PI*2);
+    ctx.fillStyle = b.color; ctx.fill();
+  });
+
+  drawTimeAxis(LABEL, PW);
+}
+
+function drawTimeAxis(xStart, width) {
+  const secs = windowN / FS;
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.font = '500 9px JetBrains Mono, monospace';
+  ctx.textAlign = 'center';
+  for (let s = 0; s <= secs; s += Math.ceil(secs / 5)) {
+    const x = xStart + width * (s / secs);
+    ctx.fillText(`-${secs - s}s`, x, H - 4);
+  }
+}
+
+function animationLoop() { drawFrame(); requestAnimationFrame(animationLoop); }
+animationLoop();
+
+/* ─── Spectral Density Dashboard Indicators ───────────────────────────── */
+const bandRowsEl = document.getElementById('bandRows');
+BANDS.forEach(b => {
+  bandRowsEl.insertAdjacentHTML('beforeend', `
+    <div class="spect-row">
+      <div class="spect-top">
+        <div>
+          <span class="spect-name" style="color:${b.color}">${b.name}</span>
+          <span class="spect-hz">${b.hz}</span>
+        </div>
+        <span class="spect-val" style="color:${b.color}" id="pwr-${b.key}">0.00</span>
+      </div>
+      <div class="spect-bar-track">
+        <div class="spect-bar-fill" style="background:${b.color};width:0%;" id="bar-${b.key}"></div>
+      </div>
+    </div>`);
+});
+
+let lastPowerUpdate = 0;
+function updatePower() {
+  const now = performance.now();
+  if (now - lastPowerUpdate < 100) return; // limit to 10hz updates to conserve CPU
+  lastPowerUpdate = now;
+
+  let total = 0;
+  const powers = {};
+  BANDS.forEach(b => { powers[b.key] = bufs[b.key].rms(256); total += powers[b.key]; });
+
+  let domKey = 'delta', domMax = 0;
+  BANDS.forEach(b => { if (powers[b.key] > domMax) { domMax = powers[b.key]; domKey = b.key; } });
+  const dom = BANDS.find(b => b.key === domKey);
+
+  BANDS.forEach(b => {
+    const pct = total > 0 ? Math.min((powers[b.key] / total) * 350, 100) : 0;
+    
+    // Smooth responsive bar updates
+    const barFill = document.getElementById(`bar-${b.key}`);
+    barFill.style.width = pct + '%';
+    barFill.style.boxShadow = `0 0 10px ${b.color}`;
+    document.getElementById(`pwr-${b.key}`).textContent = powers[b.key].toFixed(2);
+  });
+
+  // Dynamic Holographic State updates
+  document.getElementById('domName').textContent  = dom.name;
+  document.getElementById('domName').style.color  = dom.color;
+  document.getElementById('domDesc').textContent  = dom.desc;
+  document.getElementById('domFreq').textContent  = dom.hz;
+  
+  // Glowing orb animation shifts according to dominant band color
+  const orb = document.getElementById('orbPulse');
+  orb.style.background = `radial-gradient(circle, ${dom.color} 0%, transparent 75%)`;
+  orb.style.boxShadow = `0 0 24px ${dom.color}`;
+  
+  // Custom stats panel
+  const statBadge = document.getElementById('sDom');
+  statBadge.textContent = dom.name;
+  statBadge.style.color = dom.color;
+  statBadge.style.textShadow = `0 0 8px ${dom.color}`;
+}
+
+/* ─── File Load Simulation Mechanism ──────────────────────────────────── */
+let simMode = false;
+let simInterval = null;
+let simDataLines = [];
+let simIdx = 0;
+let simArtifactCount = 0;
+
+// Simulation Noise Filters (matches Arduino 3-layer filter exactly)
+const MIN_VALID = 20;
+const MAX_VALID = 1003;
+let lastGoodSim = 512;
+let medBufSim = [512, 512, 512];
+let medIdxSim = 0;
+
+function medianFilterSim(v) {
+  medBufSim[medIdxSim] = v;
+  medIdxSim = (medIdxSim + 1) % 3;
+  let a = medBufSim[0], b = medBufSim[1], c = medBufSim[2];
+  if (a > b) { let t = a; a = b; b = t; }
+  if (b > c) { let t = b; b = c; c = t; }
+  if (a > b) { let t = a; a = b; b = t; }
+  return b;
+}
+
+let zSOS = [
+  { z1: 0, z2: 0 },
+  { z1: 0, z2: 0 },
+  { z1: 0, z2: 0 },
+  { z1: 0, z2: 0 }
+];
+
+function EEGFilterSim(inVal) {
+  let o = inVal;
+  {
+    let x = o - (-0.95391350) * zSOS[0].z1 - 0.25311356 * zSOS[0].z2;
+    o = 0.00735282 * x + 0.01470564 * zSOS[0].z1 + 0.00735282 * zSOS[0].z2;
+    zSOS[0].z2 = zSOS[0].z1; zSOS[0].z1 = x;
+  }
+  {
+    let x = o - (-1.20596630) * zSOS[1].z1 - 0.60558332 * zSOS[1].z2;
+    o = 1.0 * x + 2.0 * zSOS[1].z1 + 1.0 * zSOS[1].z2;
+    zSOS[1].z2 = zSOS[1].z1; zSOS[1].z1 = x;
+  }
+  {
+    let x = o - (-1.97690645) * zSOS[2].z1 - 0.97706395 * zSOS[2].z2;
+    o = 1.0 * x + (-2.0) * zSOS[2].z1 + 1.0 * zSOS[2].z2;
+    zSOS[2].z2 = zSOS[2].z1; zSOS[2].z1 = x;
+  }
+  {
+    let x = o - (-1.99071687) * zSOS[3].z1 - 0.99086813 * zSOS[3].z2;
+    o = 1.0 * x + (-2.0) * zSOS[3].z1 + 1.0 * zSOS[3].z2;
+    zSOS[3].z2 = zSOS[3].z1; zSOS[3].z1 = x;
+  }
+  return o;
+}
+
+function triggerFileSelect() {
+  document.getElementById('fileInput').click();
+}
+
+function loadSimulationFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    const lines = text.split('\n');
+    startSimulation(lines);
+  };
+  reader.readAsText(file);
+}
+
+function startSimulation(lines) {
+  stopSimulation();
+  if (connected) doDisconnect();
+
+  simMode = true;
+  simDataLines = lines;
+  simIdx = 0;
+  simArtifactCount = 0;
+  sampleCount = 0;
+  sessionStart = Date.now();
+
+  // Reset filter buffers
+  lastGoodSim = 512;
+  medBufSim = [512, 512, 512];
+  medIdxSim = 0;
+  zSOS.forEach(s => { s.z1 = 0; s.z2 = 0; });
+  lps.forEach(lp => lp.reset());
+  BANDS.forEach(b => bufs[b.key] = new Ring(MAX_BUF));
+
+  document.getElementById('sArt').textContent = '0';
+  document.getElementById('simBtn').textContent = '⏹ Stop Simulation';
+  setStatus('on', 'SIMULATING · File Active');
+  document.getElementById('recBtn').disabled = false;
+
+  // Stream at 256 Hz (approx 3.9ms per sample)
+  const intervalMs = 1000 / 256;
+  simInterval = setInterval(() => {
+    if (simIdx >= simDataLines.length) {
+      stopSimulation();
+      setStatus('', 'Simulation Complete');
+      return;
+    }
+
+    let line = simDataLines[simIdx++];
+    let match = line.match(/Raw\s*Value:\s*(-?\d+)/i) || line.match(/(-?\d+)/);
+    if (!match) return; // skip headers
+
+    let rawVal = parseInt(match[1]);
+    
+    // Check artifact rejection
+    let artifact = (rawVal < MIN_VALID || rawVal > MAX_VALID);
+    let adc = artifact ? lastGoodSim : rawVal;
+    if (!artifact) lastGoodSim = adc;
+
+    if (artifact) {
+      simArtifactCount++;
+      document.getElementById('sArt').textContent = simArtifactCount.toLocaleString();
+    }
+
+    // Apply Median + Butterworth bandpass filter
+    let med = medianFilterSim(adc);
+    let filtered = EEGFilterSim(med);
+
+    onLine(filtered);
+  }, intervalMs);
+}
+
+function stopSimulation() {
+  if (simInterval) {
+    clearInterval(simInterval);
+    simInterval = null;
+  }
+  if (simMode) {
+    simMode = false;
+    document.getElementById('simBtn').textContent = '📂 Load simulation file';
+    document.getElementById('fileInput').value = '';
+  }
+}
+
+/* ─── USB Serial Connection Manager ─────────────────────────────────────── */
+let port = null, reader = null, connected = false;
+let sampleCount = 0, sessionStart = null;
+
+async function toggleConnect() {
+  connected ? doDisconnect() : doConnect();
+}
+
+async function doConnect() {
+  stopSimulation(); // stop file simulation if active
+  if (!('serial' in navigator)) {
+    document.getElementById('noSerial').style.display = 'block'; return;
+  }
+  try {
+    setStatus('pulse', 'Connecting…');
+    port = await navigator.serial.requestPort();
+    await port.open({ baudRate: 115200 });
+    connected = true;
+    sessionStart = Date.now();
+    sampleCount  = 0;
+    setStatus('on', '115200 BAUD · LIVE');
+    document.getElementById('connectBtn').textContent = '⏏ Disconnect';
+    document.getElementById('recBtn').disabled = false;
+
+    const tds = new TextDecoderStream();
+    port.readable.pipeTo(tds.writable);
+    reader = tds.readable.getReader();
+    let buf = '';
+    while (connected) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += value;
+      const lines = buf.split('\n');
+      buf = lines.pop();
+      lines.forEach(onLine);
+    }
+  } catch(e) {
+    setStatus('', 'Disconnected');
+    console.error(e);
+  }
+}
+
+async function doDisconnect() {
+  connected = false;
+  try { await reader?.cancel(); } catch(e) {}
+  try { await port?.close(); }   catch(e) {}
+  reader = port = null;
+  setStatus('', 'Disconnected');
+  document.getElementById('connectBtn').textContent = '⚡ Connect Arduino';
+  document.getElementById('recBtn').disabled = true;
+  if (isRecording) toggleRec();
+}
+
+function setStatus(dotClass, txt) {
+  document.getElementById('dot').className   = 'dot ' + dotClass;
+  document.getElementById('statusTxt').textContent = txt;
+}
+
+/* ─── Real-Time DSP Sample Processing ───────────────────────────────────── */
+function onLine(line) {
+  const v = (typeof line === 'number') ? line : parseFloat(line.trim());
+  if (!isFinite(v)) return;
+
+  sampleCount++;
+  const bands = extractBands(v);
+  BANDS.forEach(b => bufs[b.key].push(bands[b.key]));
+
+  if (sampleCount % 32 === 0) {
+    document.getElementById('sSamples').textContent = sampleCount.toLocaleString();
+    updatePower();
+    updateTime();
+  }
+
+  if (isRecording) logSample(v, bands);
+}
+
+function updateTime() {
+  if (!sessionStart) return;
+  const s = Math.floor((Date.now() - sessionStart) / 1000);
+  document.getElementById('sTime').textContent =
+    String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+}
+
+/* ─── Collapsible Terminal Logic ────────────────────────────────────────── */
+function toggleTerminal() {
+  const panel = document.getElementById('termPanel');
+  const status = document.getElementById('termStatus');
+  panel.classList.toggle('expanded');
+  if (panel.classList.contains('expanded')) {
+    status.textContent = 'Expanded (Click to collapse)';
+  } else {
+    status.textContent = 'Collapsed (Click to toggle)';
+  }
+}
+
+/* ─── Unthrottled Premium Data Logging Engine ───────────────────────────── */
+let isRecording = false, logData = [], lastLogMs = 0;
+const LOG_INTERVAL = 50;  // DOM drawing throttle, array is unthrottled
+
+function toggleRec() {
+  isRecording = !isRecording;
+  const btn = document.getElementById('recBtn');
+  if (isRecording) {
+    if (logData.length === 0) document.getElementById('logBody').innerHTML = '';
+    btn.textContent = '⏹ Stop'; btn.classList.add('active');
+    lastLogMs = 0;
+  } else {
+    btn.textContent = '⏺ Record'; btn.classList.remove('active');
+    document.getElementById('dlBtn').disabled  = logData.length === 0;
+    document.getElementById('clrBtn').disabled = logData.length === 0;
+  }
+}
+
+function logSample(raw, bands) {
+  let domKey = 'delta', domMax = 0;
+  BANDS.forEach(b => { const p = Math.abs(bands[b.key]); if (p > domMax) { domMax = p; domKey = b.key; }});
+  const dom = BANDS.find(b => b.key === domKey);
+
+  // Unthrottled 256Hz high-fidelity memory log
+  const row = {
+    n: logData.length + 1,
+    ts: Date.now() - sessionStart,
+    raw: raw.toFixed(4),
+    delta: bands.delta.toFixed(4),
+    theta: bands.theta.toFixed(4),
+    alpha: bands.alpha.toFixed(4),
+    beta:  bands.beta.toFixed(4),
+    gamma: bands.gamma.toFixed(4),
+    band:  dom.name,
+    color: dom.color,
+  };
+  logData.push(row);
+
+  // Throttled DOM table update to maintain smooth 60fps rendering
+  const now = Date.now();
+  if (now - lastLogMs >= LOG_INTERVAL) {
+    lastLogMs = now;
+
+    const tbody = document.getElementById('logBody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${row.n}</td>
+      <td>${row.ts}</td>
+      <td>${row.raw}</td>
+      <td style="color:var(--delta)">${row.delta}</td>
+      <td style="color:var(--theta)">${row.theta}</td>
+      <td style="color:var(--alpha)">${row.alpha}</td>
+      <td style="color:var(--beta)">${row.beta}</td>
+      <td style="color:var(--gamma)">${row.gamma}</td>
+      <td style="color:${row.color};font-weight:700">${row.band}</td>`;
+    tbody.appendChild(tr);
+
+    // Limit active visible DOM elements
+    while (tbody.rows.length > 50) tbody.deleteRow(0);
+
+    const wrap = document.getElementById('tblWrap');
+    wrap.scrollTop = wrap.scrollHeight;
+  }
+
+  document.getElementById('sLogged').textContent = logData.length.toLocaleString();
+}
+
+function downloadCSV() {
+  if (!logData.length) return;
+  const hdr = 'Row,Timestamp_ms,RawEEG,Delta,Theta,Alpha,Beta,Gamma,DominantBand\n';
+  const rows = logData.map(r =>
+    `${r.n},${r.ts},${r.raw},${r.delta},${r.theta},${r.alpha},${r.beta},${r.gamma},${r.band}`);
+  const blob = new Blob([hdr + rows.join('\n')], { type: 'text/csv' });
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(blob),
+    download: `mindsync_${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.csv`
+  });
+  a.click();
+}
+
+function clearLog() {
+  logData = [];
+  document.getElementById('logBody').innerHTML =
+    '<tr><td colspan="9" style="text-align:center;color:var(--t3);padding:24px;">Log cleared.</td></tr>';
+  document.getElementById('sLogged').textContent = '0';
+  document.getElementById('dlBtn').disabled  = true;
+  document.getElementById('clrBtn').disabled = true;
+}
+
+function setWindow(v) { windowN = parseInt(v); }
+function setLayout(v) { layoutMode = v; }
+
+/* ─── Web Serial Compatibility Check ────────────────────────────────────── */
+if (!('serial' in navigator)) {
+  document.getElementById('noSerial').style.display = 'block';
+  document.getElementById('connectBtn').disabled = true;
+}
+</script>
+
+</body>
+</html>
