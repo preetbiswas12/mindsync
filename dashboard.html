@@ -103,7 +103,7 @@
       font-family: 'Outfit', sans-serif;
       font-size: 20px; font-weight: 800; letter-spacing: -0.5px;
       background: linear-gradient(90deg, #fff, var(--t2));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
     .logo-badge {
       font-size: 9px; font-family: 'JetBrains Mono', monospace;
@@ -184,17 +184,25 @@
     .dashboard-layout {
       height: calc(100vh - 70px);
       display: grid;
-      grid-template-columns: 1fr 280px;
-      grid-template-rows: auto 1fr auto;
+      grid-template-columns: minmax(0, 1fr) 380px;
+      grid-template-rows: auto minmax(0, 1.18fr) auto;
       padding: 16px; gap: 16px;
       overflow: hidden; position: relative; z-index: 1;
     }
 
-    /* ─── Premium Glassmorphic Stats Grid (Compact Viewport Fit) ───────── */
-    .stats-container {
+    .top-strip {
       grid-column: 1 / -1;
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: minmax(0, 1.12fr) minmax(260px, 0.66fr);
+      gap: 16px;
+      min-width: 0;
+      align-items: stretch;
+    }
+
+    /* ─── Premium Glassmorphic Stats Grid (Compact Viewport Fit) ───────── */
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
       flex-shrink: 0;
     }
@@ -202,8 +210,9 @@
       background: rgba(13, 13, 27, 0.35);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 8px 14px;
-      display: flex; flex-direction: column; gap: 2px;
+      padding: 16px 18px;
+      min-height: 100px;
+      display: flex; flex-direction: column; gap: 6px;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative; overflow: hidden;
     }
@@ -216,16 +225,17 @@
       content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%;
       background: var(--accent, var(--delta));
     }
-    .stat-lbl { font-size: 9px; color: var(--t3); text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600; }
-    .stat-val-group { display: flex; align-items: baseline; gap: 3px; }
-    .stat-val { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: var(--t1); }
-    .stat-unit { font-size: 10px; color: var(--t3); font-weight: 500; }
+    .stat-lbl { font-size: 11px; color: var(--t3); text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600; }
+    .stat-val-group { display: flex; align-items: baseline; gap: 4px; }
+    .stat-val { font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 800; color: var(--t1); letter-spacing: -0.7px; }
+    .stat-unit { font-size: 12px; color: var(--t3); font-weight: 500; }
 
     /* ─── Primary Waveform Console ─────────────────────────────────────── */
     .wave-console {
       display: flex; flex-direction: column;
       overflow: hidden;
       min-height: 0; /* allows grid item to shrink and scale dynamically */
+      max-height: none;
     }
     .console-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -247,19 +257,32 @@
     .canvas-container {
       flex: 1; width: 100%; position: relative; overflow: hidden;
       background: rgba(2, 2, 6, 0.6);
-      min-height: 0;
+      min-height: 320px;
     }
     #eegCanvas { display: block; width: 100%; height: 100%; }
 
     /* ─── Advanced Side Panel ───────────────────────────────────────────── */
     .side-panel {
-      display: flex; flex-direction: column; gap: 14px;
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-auto-rows: minmax(0, max-content);
+      gap: 10px;
+      align-content: start;
       overflow: hidden; /* no panel-level scrollbar */
       height: 100%; min-height: 0;
     }
     .side-card {
       padding: 12px 16px;
       display: flex; flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .mind-summary-card {
+      padding: 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
     
     /* Dynamic Pulsing Orb */
@@ -268,7 +291,7 @@
       padding: 4px 0; border-bottom: 1px solid var(--border); margin-bottom: 10px;
     }
     .dominant-orb-container {
-      width: 70px; height: 70px; margin-bottom: 8px;
+      width: 92px; height: 92px; margin-bottom: 12px;
       position: relative; display: flex; align-items: center; justify-content: center;
     }
     .orb-pulse {
@@ -292,26 +315,26 @@
       50% { transform: translateY(-4px); }
     }
     .dominant-name {
-      font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 800;
+      font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 800;
       text-transform: uppercase; letter-spacing: -0.5px;
       transition: color 0.5s ease; text-shadow: 0 0 10px rgba(255,255,255,0.05);
     }
-    .dominant-desc { font-size: 11px; color: var(--t2); text-align: center; margin-top: 2px; }
-    .dominant-hz { font-size: 10px; color: var(--t3); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+    .dominant-desc { display: none; }
+    .dominant-hz { font-size: 12px; color: var(--t3); font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
 
     /* Live Spectral Power Bars */
     .spectral-rows {
-      display: flex; flex-direction: column; gap: 10px;
-      overflow-y: auto; flex: 1; /* only power bars scroll internally if squished */
-      padding-right: 2px;
+      display: flex; flex-direction: column; gap: 6px;
+      overflow: hidden; flex: 1;
+      padding-right: 0;
     }
-    .spect-row {}
-    .spect-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-    .spect-name { font-size: 11px; font-weight: 600; font-family: 'Outfit', sans-serif; }
-    .spect-hz { font-size: 9px; color: var(--t3); font-weight: 400; margin-left: 3px; }
-    .spect-val { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500; }
-    .spect-bar-track { height: 5px; border-radius: 2.5px; background: rgba(255,255,255,0.04); overflow: hidden; }
-    .spect-bar-fill { height: 100%; border-radius: 2.5px; transition: width 0.1s linear, box-shadow 0.3s; }
+    .spect-row { display: flex; flex-direction: column; gap: 2px; }
+    .spect-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px; }
+    .spect-name { font-size: 12px; font-weight: 600; font-family: 'Outfit', sans-serif; }
+    .spect-hz { font-size: 10px; color: var(--t3); font-weight: 400; margin-left: 3px; }
+    .spect-val { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500; }
+    .spect-bar-track { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.04); overflow: hidden; }
+    .spect-bar-fill { height: 100%; border-radius: 2px; transition: width 0.1s linear, box-shadow 0.3s; }
 
     /* ─── Collapsible Interactive Terminal Console ──────────────────────── */
     .terminal-panel {
@@ -394,48 +417,74 @@
 <!-- ─── PRIMARY DASHBOARD GRID ──────────────────────────────────────────────── -->
 <div class="dashboard-layout">
 
-  <!-- Gorgeous Stats Row -->
-  <div class="stats-container">
-    <div class="stat-card" style="--accent:var(--delta)">
-      <span class="stat-lbl">Sample Rate</span>
-      <div class="stat-val-group">
-        <span class="stat-val" style="color:var(--delta)">256</span>
-        <span class="stat-unit">Hz</span>
+  <!-- Top Strip: Stats + Mind State -->
+  <div class="top-strip">
+    <div class="stats-container">
+      <div class="stat-card" style="--accent:var(--delta)">
+        <span class="stat-lbl">Sample Rate</span>
+        <div class="stat-val-group">
+          <span class="stat-val" style="color:var(--delta)">256</span>
+          <span class="stat-unit">Hz</span>
+        </div>
+      </div>
+      <div class="stat-card" style="--accent:var(--theta)">
+        <span class="stat-lbl">Samples Streamed</span>
+        <div class="stat-val-group">
+          <span class="stat-val" id="sSamples">0</span>
+          <span class="stat-unit">raw</span>
+        </div>
+      </div>
+      <div class="stat-card" style="--accent:var(--gamma)">
+        <span class="stat-lbl">Artifacts Rejected</span>
+        <div class="stat-val-group">
+          <span class="stat-val" id="sArt" style="color:var(--gamma)">0</span>
+          <span class="stat-unit">spikes</span>
+        </div>
+      </div>
+      <div class="stat-card" style="--accent:var(--alpha)">
+        <span class="stat-lbl">Session Clock</span>
+        <div class="stat-val-group">
+          <span class="stat-val" id="sTime">00:00</span>
+          <span class="stat-unit">mm:ss</span>
+        </div>
+      </div>
+      <div class="stat-card" style="--accent:var(--alpha)">
+        <span class="stat-lbl">High-Fi Logs</span>
+        <div class="stat-val-group">
+          <span class="stat-val" id="sLogged" style="color:var(--alpha)">0</span>
+          <span class="stat-unit">rows</span>
+        </div>
+      </div>
+      <div class="stat-card" style="--accent:var(--beta)">
+        <span class="stat-lbl">Dominant Wave</span>
+        <div class="stat-val-group">
+          <span class="stat-val" id="sDom" style="color:var(--t3)">–</span>
+        </div>
       </div>
     </div>
-    <div class="stat-card" style="--accent:var(--theta)">
-      <span class="stat-lbl">Samples Streamed</span>
-      <div class="stat-val-group">
-        <span class="stat-val" id="sSamples">0</span>
-        <span class="stat-unit">raw</span>
+
+    <div class="mind-summary-card glass-panel">
+      <span style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:2px;font-weight:700;border-bottom:1px solid var(--border);padding-bottom:10px;">Mind State</span>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+          <div id="mindOrb" style="width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle, rgba(255,255,255,0.18), transparent 70%);box-shadow:0 0 20px rgba(34,245,160,0.2);flex-shrink:0;">
+            <span id="mindFace" style="font-size:28px;line-height:1;">🙂</span>
+          </div>
+          <div style="min-width:0;">
+            <div id="mindLabel" style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.4px;color:var(--alpha);line-height:1;">Balanced</div>
+            <div id="mindDesc" style="font-size:11px;color:var(--t2);margin-top:4px;line-height:1.4;">Waiting for live waves…</div>
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1.5px;">Confidence</div>
+          <div id="mindConfText" style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--alpha);">0%</div>
+        </div>
       </div>
-    </div>
-    <div class="stat-card" style="--accent:var(--gamma)">
-      <span class="stat-lbl">Artifacts Rejected</span>
-      <div class="stat-val-group">
-        <span class="stat-val" id="sArt" style="color:var(--gamma)">0</span>
-        <span class="stat-unit">spikes</span>
+      <div id="mindTag" style="display:inline-flex;align-items:center;align-self:flex-start;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t2);">Single band</div>
+      <div style="height:10px;border-radius:999px;background:rgba(255,255,255,0.06);overflow:hidden;">
+        <div id="mindConfBar" style="height:100%;width:0%;border-radius:inherit;background:var(--alpha);transition:width 0.2s linear, background 0.2s linear;"></div>
       </div>
-    </div>
-    <div class="stat-card" style="--accent:var(--alpha)">
-      <span class="stat-lbl">Session Clock</span>
-      <div class="stat-val-group">
-        <span class="stat-val" id="sTime">00:00</span>
-        <span class="stat-unit">mm:ss</span>
-      </div>
-    </div>
-    <div class="stat-card" style="--accent:var(--alpha)">
-      <span class="stat-lbl">High-Fi Logs</span>
-      <div class="stat-val-group">
-        <span class="stat-val" id="sLogged" style="color:var(--alpha)">0</span>
-        <span class="stat-unit">rows</span>
-      </div>
-    </div>
-    <div class="stat-card" style="--accent:var(--beta)">
-      <span class="stat-lbl">Dominant Wave</span>
-      <div class="stat-val-group">
-        <span class="stat-val" id="sDom" style="color:var(--t3)">–</span>
-      </div>
+      <div id="mindBands" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
     </div>
   </div>
 
@@ -466,7 +515,6 @@
 
   <!-- Dynamic Control & Spectral Analysis Side Panel -->
   <div class="side-panel">
-    
     <!-- Dominant Band Glowing Orb -->
     <div class="side-card glass-panel" style="align-items:center;text-align:center;flex-shrink:0;">
       <div class="dominant-orb-wrapper">
@@ -481,20 +529,20 @@
       <div class="dominant-hz" id="domFreq"></div>
     </div>
 
-    <!-- Live Spectral Density Grid -->
-    <div class="side-card glass-panel" style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;">
-      <span style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:2px;font-weight:700;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:14px;flex-shrink:0;">Spectral Density (RMS)</span>
-      <div class="spectral-rows" id="bandRows"></div>
-    </div>
-
     <!-- Data Logger Glass Card -->
-    <div class="side-card glass-panel" style="gap:12px;flex-shrink:0;">
-      <span style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:2px;font-weight:700;border-bottom:1px solid var(--border);padding-bottom:10px;">Logger Operations</span>
-      <div style="display:flex;gap:8px;">
+    <div class="side-card glass-panel" style="gap:10px;flex-shrink:0;flex-direction:row;align-items:center;justify-content:space-between;padding:10px 12px;">
+      <span style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:2px;font-weight:700;white-space:nowrap;">Logger</span>
+      <div style="display:flex;gap:8px;flex:1;justify-content:flex-end;min-width:0;">
         <button class="btn btn-rec" id="recBtn" onclick="toggleRec()" disabled style="flex:1;justify-content:center;">⏺ Record</button>
         <button class="btn btn-dl"  id="dlBtn"  onclick="downloadCSV()" disabled style="flex:1;justify-content:center;">⬇ CSV</button>
         <button class="btn btn-ghost" id="clrBtn" onclick="clearLog()" disabled style="padding:8px 12px;">🗑</button>
       </div>
+    </div>
+
+    <!-- Live Spectral Density Grid -->
+    <div class="side-card glass-panel" style="min-height:0;overflow:hidden;display:flex;flex-direction:column;grid-column:1 / -1;min-width:0;">
+      <span style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:2px;font-weight:700;border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:10px;flex-shrink:0;">Spectral Density (RMS)</span>
+      <div class="spectral-rows" id="bandRows"></div>
     </div>
   </div>
 
@@ -822,6 +870,221 @@ const DOM_SUPPRESS_STREAK = 3; // how many consecutive updates Delta must persis
 const SMOOTH_ALPHA = 0.98; // larger -> slower baseline (0.98 ~ ~5s time-constant at 10Hz updates)
 const SMOOTH_FLOOR = 1e-3;
 const smoothPowAvg = {};
+
+function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+
+function blendComboState(scored, activeBands) {
+  const top = scored[0];
+  const second = scored[1] || top;
+  const activeKeys = activeBands.map(b => b.key);
+  const has = (...keys) => keys.every(k => activeKeys.includes(k));
+
+  if (has('beta', 'gamma')) {
+    return {
+      label: 'Intense Flow - Alertness',
+      emoji: '⚡',
+      color: '#ff4b6e',
+      tag: 'Beta + Gamma',
+      description: 'Beta and gamma are both active, which looks like an intense and fast-thinking blend.'
+    };
+  }
+  if (has('alpha', 'beta')) {
+    return {
+      label: 'Focused Calm - Relaxed',
+      emoji: '🎯',
+      color: '#ffc200',
+      tag: 'Alpha + Beta',
+      description: 'Alpha and beta are active together, suggesting calm attention with focus.'
+    };
+  }
+  if (has('theta', 'alpha')) {
+    return {
+      label: 'Creative Flow - ',
+      emoji: '🌊',
+      color: '#22f5a0',
+      tag: 'Theta + Alpha',
+      description: 'Theta and alpha are working together, which often reads as relaxed, creative flow.'
+    };
+  }
+  if (has('delta', 'theta')) {
+    return {
+      label: 'Dream Drift',
+      emoji: '🌙',
+      color: '#00d4ff',
+      tag: 'Delta + Theta',
+      description: 'Delta and theta are active together, a pattern associated with drifting or inward attention.'
+    };
+  }
+  if (has('alpha', 'gamma')) {
+    return {
+      label: 'Sparked Calm',
+      emoji: '✨',
+      color: '#22f5a0',
+      tag: 'Alpha + Gamma',
+      description: 'Alpha is calm while gamma adds spark, creating a light high-clarity blend.'
+    };
+  }
+
+  return {
+    label: top.name,
+    emoji: top.key === 'delta' ? '😴' : top.key === 'theta' ? '🌙' : top.key === 'alpha' ? '😌' : top.key === 'beta' ? '🎯' : '⚡',
+    color: top.color,
+    tag: `Dominant ${top.name}`,
+    description: `No stronger combination stood out, so ${top.name} remains the dominant wave.`
+  };
+}
+
+function analyzeMindState(scored) {
+  const byKey = Object.fromEntries(scored.map(s => [s.key, s]));
+  const top1 = scored[0];
+  const top2 = scored[1] || top1;
+  const top3 = scored[2] || top2;
+
+  const delta = byKey.delta?.score || 0;
+  const theta = byKey.theta?.score || 0;
+  const alpha = byKey.alpha?.score || 0;
+  const beta  = byKey.beta?.score  || 0;
+  const gamma = byKey.gamma?.score || 0;
+  const activeBands = scored.filter(s => s.score >= Math.max(0.78, top1.score * 0.68));
+
+  const scoreMap = [
+    {
+      label: 'Sleepy',
+      emoji: '😴',
+      color: '#7c6ff7',
+      value: delta * 1.7 + theta * 0.6 - beta * 0.1 - gamma * 0.05,
+      description: 'Delta is strongly elevated compared with the other bands.'
+    },
+    {
+      label: 'Dreamy',
+      emoji: '🌙',
+      color: '#00d4ff',
+      value: theta * 1.6 + delta * 0.5 - beta * 0.15,
+      description: 'Theta is leading with supportive delta activity.'
+    },
+    {
+      label: 'Relaxed',
+      emoji: '😌',
+      color: '#00d4ff',
+      value: alpha * 1.5 + theta * 0.7 - beta * 0.15,
+      description: 'Alpha is steady and dominant over the faster bands.'
+    },
+    {
+      label: 'Happy',
+      emoji: '😊',
+      color: '#22f5a0',
+      value: alpha * 1.25 + theta * 0.35 - delta * 0.1,
+      description: 'Alpha is active with a calm signature that often feels positive.'
+    },
+    {
+      label: 'Focused',
+      emoji: '🎯',
+      color: '#ffc200',
+      value: beta * 1.6 + gamma * 0.8 + alpha * 0.2,
+      description: 'Beta is clearly higher than the slower bands.'
+    },
+    {
+      label: 'Intense',
+      emoji: '⚡',
+      color: '#ff4b6e',
+      value: gamma * 1.7 + beta * 0.8 - alpha * 0.1,
+      description: 'Gamma and beta are both elevated, which looks mentally intense.'
+    },
+    {
+      label: 'Balanced',
+      emoji: '😌',
+      color: '#22f5a0',
+      value: 1.2 - Math.abs(alpha - beta) * 0.1 - Math.abs(theta - delta) * 0.1,
+      description: 'No single band is strongly overpowering the others.'
+    },
+    {
+      label: 'Curious',
+      emoji: '🤔',
+      color: '#22f5a0',
+      value: theta * 0.8 + alpha * 0.8 + gamma * 0.2,
+      description: 'The signal mix suggests reflective, exploratory activity.'
+    }
+  ];
+
+  scoreMap.sort((a, b) => b.value - a.value);
+  const winner = scoreMap[0];
+  const runnerUp = scoreMap[1] || winner;
+  const confidence = clamp01(0.3 + (winner.value - runnerUp.value) * 0.12 + Math.min(top1.score, 6) * 0.06);
+
+  let label = winner.label;
+  let emoji = winner.emoji;
+  let color = winner.color;
+  let description = winner.description;
+  let tag = activeBands.length >= 3 ? '3+ bands active' : activeBands.length > 1 ? 'Mixed bands' : 'Single band';
+
+  if (activeBands.length >= 3) {
+    const combo = blendComboState(scored, activeBands);
+    label = combo.label;
+    emoji = combo.emoji;
+    color = combo.color;
+    description = combo.description;
+    tag = combo.tag;
+  } else if (activeBands.length === 2) {
+    const combo = blendComboState(scored, activeBands);
+    label = combo.label;
+    emoji = combo.emoji;
+    color = combo.color;
+    description = combo.description;
+    tag = combo.tag;
+  }
+
+  // Keep combo states and multi-band states named; only use Unclear when the signal is truly sparse.
+  if (confidence < 0.42 && activeBands.length <= 1) {
+    label = 'Unclear';
+    emoji = '❔';
+    color = '#c9d1ff';
+    description = 'The band pattern is mixed, so the state is not clear enough for a stronger label.';
+    tag = activeBands.length > 1 ? 'Mixed bands' : 'Single band';
+  }
+
+  return {
+    label,
+    emoji,
+    color,
+    description,
+    confidence,
+    tag,
+    topBands: [top1, top2, top3],
+  };
+}
+
+function updateMindPanel(state) {
+  const mindFace = document.getElementById('mindFace');
+  const mindLabel = document.getElementById('mindLabel');
+  const mindDesc = document.getElementById('mindDesc');
+  const mindOrb = document.getElementById('mindOrb');
+  const mindConfBar = document.getElementById('mindConfBar');
+  const mindConfText = document.getElementById('mindConfText');
+  const mindBands = document.getElementById('mindBands');
+  if (!mindFace || !mindLabel || !mindDesc || !mindOrb || !mindConfBar || !mindConfText || !mindBands) return;
+
+  mindFace.textContent = state.emoji;
+  mindLabel.textContent = state.label;
+  mindLabel.style.color = state.color;
+  mindDesc.textContent = '';
+  mindDesc.style.display = 'none';
+  const mindTag = document.getElementById('mindTag');
+  if (mindTag) {
+    mindTag.textContent = state.tag || (state.topBands.length === 1 ? 'Single band' : 'Ranked bands');
+    mindTag.style.color = state.color;
+    mindTag.style.borderColor = state.color + '55';
+    mindTag.style.background = state.color + '18';
+  }
+  mindOrb.style.boxShadow = `0 0 32px ${state.color}`;
+  mindOrb.style.background = `radial-gradient(circle, ${state.color}40, transparent 70%)`;
+  mindConfBar.style.width = Math.round(state.confidence * 100) + '%';
+  mindConfBar.style.background = state.color;
+  mindConfText.textContent = Math.round(state.confidence * 100) + '%';
+  mindConfText.style.color = state.color;
+  mindBands.innerHTML = state.topBands.map(function(b, i) {
+    return '<span style="display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;border:1px solid ' + b.color + '55;background:' + b.color + '12;color:' + b.color + ';font-family:Outfit,sans-serif;font-size:12px;font-weight:700;letter-spacing:0.2px;">' + (i + 1) + '. ' + b.name + '</span>';
+  }).join('');
+}
 function updatePower() {
   const now = performance.now();
   if (now - lastPowerUpdate < 100) return; // limit to 10hz updates to conserve CPU
@@ -875,8 +1138,8 @@ function updatePower() {
   
   // Glowing orb animation shifts according to dominant band color
   const orb = document.getElementById('orbPulse');
-  orb.style.background = `radial-gradient(circle, ${dom.color} 0%, transparent 75%)`;
-  orb.style.boxShadow = `0 0 24px ${dom.color}`;
+  orb.style.background = `radial-gradient(circle, ${displayTop1.color} 0%, transparent 75%)`;
+  orb.style.boxShadow = `0 0 24px ${displayTop1.color}`;
   
   // Custom stats panel
   const statBadge = document.getElementById('sDom');
@@ -884,7 +1147,9 @@ function updatePower() {
   statBadge.innerHTML = top3.map((t, i) =>
     `<span style="color:${t.color};font-weight:700;opacity:${i===0?1:0.85};margin-right:6px;">${i+1}. ${t.name}</span>`
   ).join('');
-  statBadge.style.textShadow = `0 0 8px ${displayTop1.color}`;
+  statBadge.style.textShadow = 'none';
+
+  updateMindPanel(analyzeMindState(scored));
 }
 
 /* ─── File Load Simulation Mechanism ──────────────────────────────────── */
