@@ -815,6 +815,13 @@ BANDS.forEach(b => {
 });
 
 let lastPowerUpdate = 0;
+let deltaDomStreak = 0;
+let altDomIndex = 0;
+const DOM_SUPPRESS_STREAK = 3; // how many consecutive updates Delta must persist before rotating
+// Long-term smoothing for per-band baseline (used to compute relative score)
+const SMOOTH_ALPHA = 0.98; // larger -> slower baseline (0.98 ~ ~5s time-constant at 10Hz updates)
+const SMOOTH_FLOOR = 1e-3;
+const smoothPowAvg = {};
 function updatePower() {
   const now = performance.now();
   if (now - lastPowerUpdate < 100) return; // limit to 10hz updates to conserve CPU
@@ -824,9 +831,31 @@ function updatePower() {
   const powers = {};
   BANDS.forEach(b => { powers[b.key] = bufs[b.key].rms(256); total += powers[b.key]; });
 
-  let domKey = 'delta', domMax = 0;
-  BANDS.forEach(b => { if (powers[b.key] > domMax) { domMax = powers[b.key]; domKey = b.key; } });
-  const dom = BANDS.find(b => b.key === domKey);
+  // Update long-term baseline EMA per band
+  BANDS.forEach(b => {
+    smoothPowAvg[b.key] = (smoothPowAvg[b.key] || 0) * SMOOTH_ALPHA + (1 - SMOOTH_ALPHA) * powers[b.key];
+  });
+
+  // Compute relative score = current power / baseline (higher -> more active relative to its normal)
+  const scored = BANDS.map(b => {
+    const base = Math.max(smoothPowAvg[b.key] || 0, SMOOTH_FLOOR);
+    const score = powers[b.key] / base;
+    return { key: b.key, name: b.name, color: b.color, hz: b.hz, desc: b.desc, power: powers[b.key], score };
+  }).sort((a, z) => z.score - a.score);
+
+  // Maintain Delta suppression/rotation policy for the top display only
+  if (scored[0].key === 'delta') deltaDomStreak++; else { deltaDomStreak = 0; altDomIndex = 0; }
+
+  let displayTop1 = scored[0];
+  if (displayTop1.key === 'delta' && deltaDomStreak >= DOM_SUPPRESS_STREAK) {
+    // choose next non-delta band; rotate through the others if many updates
+    const others = scored.filter(s => s.key !== 'delta');
+    if (others.length) displayTop1 = others[altDomIndex % others.length];
+    altDomIndex++;
+  }
+
+  // Choose top-3 ranked bands for the summary display
+  const top3 = scored.slice(0, 3);
 
   BANDS.forEach(b => {
     const pct = total > 0 ? Math.min((powers[b.key] / total) * 350, 100) : 0;
@@ -839,10 +868,10 @@ function updatePower() {
   });
 
   // Dynamic Holographic State updates
-  document.getElementById('domName').textContent  = dom.name;
-  document.getElementById('domName').style.color  = dom.color;
-  document.getElementById('domDesc').textContent  = dom.desc;
-  document.getElementById('domFreq').textContent  = dom.hz;
+  document.getElementById('domName').textContent  = displayTop1.name;
+  document.getElementById('domName').style.color  = displayTop1.color;
+  document.getElementById('domDesc').textContent  = displayTop1.desc;
+  document.getElementById('domFreq').textContent  = displayTop1.hz;
   
   // Glowing orb animation shifts according to dominant band color
   const orb = document.getElementById('orbPulse');
@@ -851,15 +880,17 @@ function updatePower() {
   
   // Custom stats panel
   const statBadge = document.getElementById('sDom');
-  statBadge.textContent = dom.name;
-  statBadge.style.color = dom.color;
-  statBadge.style.textShadow = `0 0 8px ${dom.color}`;
+  // Render top-3 badges with ranking
+  statBadge.innerHTML = top3.map((t, i) =>
+    `<span style="color:${t.color};font-weight:700;opacity:${i===0?1:0.85};margin-right:6px;">${i+1}. ${t.name}</span>`
+  ).join('');
+  statBadge.style.textShadow = `0 0 8px ${displayTop1.color}`;
 }
 
 /* ─── File Load Simulation Mechanism ──────────────────────────────────── */
 let simMode = false;
 let simInterval = null;
-let simDataLines = [];
+let simDataRows = [];
 let simIdx = 0;
 let simArtifactCount = 0;
 
@@ -929,12 +960,82 @@ function loadSimulationFile(event) {
   reader.readAsText(file);
 }
 
+function parseSimulationInput(lines) {
+  const trimmed = lines
+    .map(l => l.replace(/\r/g, '').trim())
+    .filter(Boolean);
+
+  if (!trimmed.length) return [];
+
+  const header = trimmed[0].replace(/^\uFEFF/, '');
+  const lowerHeader = header.toLowerCase();
+  const isCsvLike = header.includes(',') && (
+    lowerHeader.includes('raweeg') ||
+    lowerHeader.includes('delta') ||
+    lowerHeader.includes('theta') ||
+    lowerHeader.includes('alpha') ||
+    lowerHeader.includes('beta') ||
+    lowerHeader.includes('gamma')
+  );
+
+  // CSV mode: consume precomputed columns directly when available.
+  if (isCsvLike) {
+    const cols = header.split(',').map(c => c.trim().toLowerCase());
+    const idxRaw = cols.indexOf('raweeg');
+    const idxDelta = cols.indexOf('delta');
+    const idxTheta = cols.indexOf('theta');
+    const idxAlpha = cols.indexOf('alpha');
+    const idxBeta  = cols.indexOf('beta');
+    const idxGamma = cols.indexOf('gamma');
+
+    const rows = [];
+    for (let i = 1; i < trimmed.length; i++) {
+      const parts = trimmed[i].split(',').map(p => p.trim());
+      const raw = parseFloat(parts[idxRaw]);
+      if (!isFinite(raw)) continue;
+
+      const delta = parseFloat(parts[idxDelta]);
+      const theta = parseFloat(parts[idxTheta]);
+      const alpha = parseFloat(parts[idxAlpha]);
+      const beta  = parseFloat(parts[idxBeta]);
+      const gamma = parseFloat(parts[idxGamma]);
+
+      if ([delta, theta, alpha, beta, gamma].every(Number.isFinite)) {
+        rows.push({
+          kind: 'bands',
+          raw,
+          bands: { delta, theta, alpha, beta, gamma }
+        });
+      } else {
+        rows.push({ kind: 'raw', raw });
+      }
+    }
+    return rows;
+  }
+
+  // Legacy text mode: parse single raw value per line.
+  const rows = [];
+  for (const line of trimmed) {
+    const match = line.match(/Raw\s*Value:\s*(-?\d+(?:\.\d+)?)/i) || line.match(/(-?\d+(?:\.\d+)?)/);
+    if (!match) continue;
+    const raw = parseFloat(match[1]);
+    if (isFinite(raw)) rows.push({ kind: 'raw', raw });
+  }
+  return rows;
+}
+
 function startSimulation(lines) {
   stopSimulation();
   if (connected) doDisconnect();
 
+  const parsedRows = parseSimulationInput(lines);
+  if (!parsedRows.length) {
+    setStatus('', 'Simulation Failed · No valid samples found');
+    return;
+  }
+
   simMode = true;
-  simDataLines = lines;
+  simDataRows = parsedRows;
   simIdx = 0;
   simArtifactCount = 0;
   sampleCount = 0;
@@ -956,21 +1057,24 @@ function startSimulation(lines) {
   // Stream at 256 Hz (approx 3.9ms per sample)
   const intervalMs = 1000 / 256;
   simInterval = setInterval(() => {
-    if (simIdx >= simDataLines.length) {
+    if (simIdx >= simDataRows.length) {
       stopSimulation();
       setStatus('', 'Simulation Complete');
       return;
     }
 
-    let line = simDataLines[simIdx++];
-    let match = line.match(/Raw\s*Value:\s*(-?\d+)/i) || line.match(/(-?\d+)/);
-    if (!match) return; // skip headers
+    const row = simDataRows[simIdx++];
 
-    let rawVal = parseInt(match[1]);
+    if (row.kind === 'bands') {
+      onSample(row.raw, row.bands);
+      return;
+    }
+
+    const rawVal = row.raw;
     
-    // Check artifact rejection
-    let artifact = (rawVal < MIN_VALID || rawVal > MAX_VALID);
-    let adc = artifact ? lastGoodSim : rawVal;
+    // Check artifact rejection (legacy raw mode only)
+    const artifact = (rawVal < MIN_VALID || rawVal > MAX_VALID);
+    const adc = artifact ? lastGoodSim : rawVal;
     if (!artifact) lastGoodSim = adc;
 
     if (artifact) {
@@ -979,8 +1083,8 @@ function startSimulation(lines) {
     }
 
     // Apply Median + Butterworth bandpass filter
-    let med = medianFilterSim(adc);
-    let filtered = EEGFilterSim(med);
+    const med = medianFilterSim(adc);
+    const filtered = EEGFilterSim(med);
 
     onLine(filtered);
   }, intervalMs);
@@ -1061,8 +1165,12 @@ function onLine(line) {
   const v = (typeof line === 'number') ? line : parseFloat(line.trim());
   if (!isFinite(v)) return;
 
-  sampleCount++;
   const bands = extractBands(v);
+  onSample(v, bands);
+}
+
+function onSample(raw, bands) {
+  sampleCount++;
   BANDS.forEach(b => bufs[b.key].push(bands[b.key]));
 
   if (sampleCount % 32 === 0) {
@@ -1071,7 +1179,7 @@ function onLine(line) {
     updateTime();
   }
 
-  if (isRecording) logSample(v, bands);
+  if (isRecording) logSample(raw, bands);
 }
 
 function updateTime() {
