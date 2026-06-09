@@ -146,6 +146,7 @@
   <div class="hdr-btns">
     <button class="btn btn-green" onclick="document.getElementById('file1').click()">📂 Load Pure Dataset</button>
     <input type="file" id="file1" accept=".txt,.csv" style="display:none" onchange="loadFile(event)">
+    <button class="btn btn-ghost" id="pauseBtn" onclick="togglePause()">⏸ Pause</button>
     <button class="btn btn-ghost" onclick="stopAll()">⏹ Stop</button>
   </div>
 </header>
@@ -237,7 +238,9 @@ const engine = {
   sessionStart: null,
   rmsClean: 0, rmsCleanCount: 0,
   rmsDirty: 0, rmsDirtyCount: 0,
-  noiseLevel: 0
+  noiseLevel: 0,
+  paused: false,
+  pausedAt: null
 };
 
 function gaussianNoise(mean, stdev) {
@@ -359,6 +362,10 @@ function startEngine(lines) {
   engine.rmsDirtyCount = 0;
   engine.clean.clear();
   engine.dirty.clear();
+  engine.paused = false;
+  engine.pausedAt = null;
+  const pauseBtn = document.getElementById('pauseBtn');
+  if(pauseBtn) pauseBtn.textContent = '⏸ Pause';
 
   const intervalMs = 1000 / 256;
 
@@ -434,6 +441,34 @@ function updateTime() {
 function stopEngine() {
   if(engine.simInterval){ clearInterval(engine.simInterval); engine.simInterval = null; }
   engine.simMode = false;
+}
+
+function togglePause() {
+  if(!engine.simMode) return;
+
+  engine.paused = !engine.paused;
+
+  const btn = document.getElementById('pauseBtn');
+
+  if(engine.paused) {
+    if(engine.simInterval){
+      clearInterval(engine.simInterval);
+      engine.simInterval = null;
+    }
+    engine.pausedAt = Date.now();
+    btn.textContent = '▶ Resume';
+    setStatus('wait', 'Paused');
+  } else {
+    const intervalMs = 1000 / 256;
+    engine.simInterval = setInterval(() => tick(), intervalMs);
+
+    if(engine.pausedAt && engine.sessionStart){
+      engine.sessionStart += (Date.now() - engine.pausedAt);
+    }
+
+    btn.textContent = '⏸ Pause';
+    setStatus('on', 'STREAMING clean');
+  }
 }
 
 function stopAll() {
