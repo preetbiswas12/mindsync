@@ -140,7 +140,7 @@
     <div class="logo-icon">📊</div>
     <div>
       <div class="logo-title">Dual Signal Comparison</div>
-      <div class="subtitle">Clean vs Noisy/Delayed — Overlay View</div>
+      <div class="subtitle">Normal vs Switching — Overlay View</div>
     </div>
   </div>
   <div class="hdr-btns">
@@ -155,7 +155,7 @@
     <div class="panel-hdr">
       <div class="panel-title">
         <span class="badge badge-clean">✅ Clean Signal</span>
-        <span class="badge badge-dirty">⚠️ Noisy + 1s Delay</span>
+        <span class="badge badge-dirty">✅ Switching Signal</span>
         <span style="font-size:11px;color:var(--t3);font-family:'Outfit',sans-serif;margin-left:12px;">Real-time overlay comparison</span>
       </div>
       <div class="status">
@@ -188,11 +188,11 @@
         <span class="stat-val" id="sSamp1">0</span>
       </div>
       <div class="stat-cell">
-        <span class="stat-lbl">Clean RMS</span>
+        <span class="stat-lbl">Normal RMS</span>
         <span class="stat-val" id="sRmsClean">—</span>
       </div>
       <div class="stat-cell">
-        <span class="stat-lbl">Noisy RMS</span>
+        <span class="stat-lbl">Switching RMS</span>
         <span class="stat-val" id="sRmsDirty">—</span>
       </div>
       <div class="stat-cell">
@@ -381,7 +381,7 @@ function tick() {
   engine.rmsClean += raw * raw;
   engine.rmsCleanCount++;
 
-  // Delayed noisy sample (1 second = ~256 samples)
+  // Delayed switching sample (1 second = ~256 samples)
   const DELAY_SAMPLES = 256;
   if(engine.sampleCount >= DELAY_SAMPLES) {
     const idx = engine.simIdx - (DELAY_SAMPLES + 1);
@@ -393,7 +393,7 @@ function tick() {
       engine.rmsDirty += dirtyRaw * dirtyRaw;
       engine.rmsDirtyCount++;
       
-      // Calculate noise level - compare clean vs noisy
+      // Calculate noise level - compare normal vs switching
       const cleanVal = engine.simDataRows[idx].raw;
       const noiseVal = Math.abs(dirtyRaw - cleanVal);
       const avgAbsVal = (Math.abs(cleanVal) + Math.abs(dirtyRaw)) / 2;
@@ -488,7 +488,7 @@ function drawWaveform() {
     ctx.fillText('📂 Load a CSV file to start', W/2, H/2 - 20);
     ctx.font = '400 12px Inter,sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.15)';
-    ctx.fillText('Upload pure dataset to compare clean vs noisy signals', W/2, H/2 + 10);
+    ctx.fillText('Upload pure dataset to compare normal vs switching signals', W/2, H/2 + 10);
     return;
   }
 
@@ -515,7 +515,7 @@ function drawWaveform() {
   ctx.fillStyle = 'rgba(255,255,255,0.15)';
   ctx.font = '500 10px JetBrains Mono,monospace';
   ctx.textAlign = 'right';
-  ctx.fillText(`Clean: ${clean.len} | Noisy: ${dirty.len} samples`, W - 10, H - 8);
+  ctx.fillText(`Normal: ${clean.len} | Switching: ${dirty.len} samples`, W - 10, H - 8);
   
   // Visual legend in top-left
   ctx.font = 'bold 12px Inter,sans-serif';
@@ -527,7 +527,7 @@ function drawWaveform() {
   
   // Red label
   ctx.fillStyle = WAVE_COLOR_DIRTY;
-  ctx.fillText('● NOISY + DELAYED', 20, 55);
+  ctx.fillText('● SWITCHING SIGNAL', 20, 55);
 }
 
 function drawSignal(ctx, ring, N, color, scale, midY, W, H, isDirty) {
