@@ -1,0 +1,1347 @@
+* Written by DesignSpark 29.0.3.4
+
+/B1[BATT]
+2[+=N0081]
+3[-=AGND]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/BLE1[RFD22301]
+1[GND=AGND]
+2[GND=AGND]
+3[GPIO2=RXD]
+4[GPIO3=TXD]
+5[GPIO4=RF_IO4]
+6[GPIO5=PGC]
+8[GND=AGND]
+9[GND=AGND]
+10[GND=AGND]
+12[GND=AGND]
+13[3V=DVDD]
+14[RESET=RF_RESET]
+16[GPIO0/AREF=RF_RXD]
+17[GPIO1=RF_TXD]
+18[GND=AGND]
+19[GND=AGND]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/C1[0603YC104KATDA]
+1[=AVSS]
+2[=N0148]
+VALUE:10uF
+Mfr:AVX
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+_DESTPACK:SM0603
+#
+
+/C2[C 100uF]
+1[=AVSS]
+2[=N0092]
+VALUE:100uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:1206
+#
+
+/C3[CKCL44X7R1H102M085AA]
+1[=AGND]
+2[=AGND]
+3[=AGND]
+4[=AGND]
+5[=_SRB1]
+6[=_SRB2]
+7[=IN1P]
+8[=IN1N]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SMT
+#
+
+/C4[C 100uF]
+1[=DVDD]
+2[=AGND]
+VALUE:100uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:1206
+#
+
+/C5[C]
+1[A=AVSS]
+2[B=N0148]
+VALUE:.1uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C6[C]
+1[A=AVSS]
+2[B=N0093]
+VALUE:1uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C7[C]
+1[A=AVSS]
+2[B=N0091]
+VALUE:1uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C8[0603YC104KATDA]
+1[=DVDD]
+2[=AGND]
+VALUE:10uF
+Mfr:AVX
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+_DESTPACK:SM0603
+#
+
+/C9[CKCL44X7R1H102M085AA]
+1[=AGND]
+2[=AGND]
+3[=AGND]
+4[=AGND]
+5[=IN2P]
+6[=IN2N]
+7[=IN3P]
+8[=IN3N]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SMT
+#
+
+/C10[C]
+1[A=DVDD]
+2[B=AGND]
+VALUE:.1uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C11[CKCL44X7R1H102M085AA]
+1[=AGND]
+2[=AGND]
+3[=AGND]
+4[=AGND]
+5[=IN4P]
+6[=IN4N]
+7[=IN5P]
+8[=IN5N]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SMT
+#
+
+/C12[C]
+1[A=AGND]
+2[B=DVDD]
+VALUE:.1uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C13[C]
+1[A=AVSS]
+2[B=AVDD]
+VALUE:.1uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C14[C]
+1[A=AGND]
+2[B=DVDD]
+VALUE:1uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C15[C]
+1[A=N0013]
+2[B=AVSS]
+VALUE:0.1uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C16[C]
+1[A=BIAS_OUT]
+2[B=BIAS_DRV]
+VALUE:1nF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C17[C]
+1[A=AVSS]
+2[B=AVDD]
+VALUE:1uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C18[C]
+1[A=AVSS]
+2[B=AGND]
+VALUE:1uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C19[C]
+1[A=N0013]
+2[B=AVSS]
+VALUE:1uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C20[C]
+1[A=AGND]
+2[B=N1000]
+VALUE:18pF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:0402
+#
+
+/C21[C]
+1[A=AVSS]
+2[B=AGND]
+VALUE:1uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C22[C]
+1[A=AGND]
+2[B=AVDD]
+VALUE:1uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C23[C]
+1[A=AGND]
+2[B=N0999]
+VALUE:18pF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:0402
+#
+
+/C24[C]
+1[A=AGND]
+2[B=AVDD]
+VALUE:.1uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C25[0603YC104KATDA]
+1[=AGND]
+2[=N0997]
+VALUE:10uF
+Mfr:AVX
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+_DESTPACK:SM0603
+#
+
+/C26[CKCL44X7R1H102M085AA]
+1[=AGND]
+2[=AGND]
+3[=AGND]
+4[=AGND]
+5[=IN6P]
+6[=IN6N]
+7[=IN7P]
+8[=IN7N]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SMT
+#
+
+/C27[C]
+1[A=AGND]
+2[B=AVDD]
+VALUE:1uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C28[C]
+1[A=AGND]
+2[B=AVDD]
+VALUE:.1uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C29[0603YC104KATDA]
+1[=AGND]
+2[=AVSS]
+VALUE:10uF
+Mfr:AVX
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+_DESTPACK:SM0603
+#
+
+/C30[C]
+1[A=AGND]
+2[B=N0067]
+VALUE:0.01uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C31[06033G104ZATDA]
+1[=N0136]
+2[=N0135]
+VALUE:10uF
+Mfr:AVX
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+_DESTPACK:SM0603
+#
+
+/C32[C]
+1[A=AGND]
+2[B=AVSS]
+VALUE:2.2uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C33[06033G104ZATDA]
+1[=AGND]
+2[=-RAW]
+VALUE:10uF
+Mfr:AVX
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+_DESTPACK:SM0603
+#
+
+/C34[CKCL44X7R1H102M085AA]
+1[=AGND]
+2[=AGND]
+3[=AGND]
+4[=AGND]
+5[=IN8P]
+6[=IN8N]
+7[=AGND]
+8[=BIAS_DRV]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SMT
+#
+
+/C35[C]
+1[A=AGND]
+2[B=AVDD]
+VALUE:2.2uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C36[C]
+1[A=AGND]
+2[B=-RAW]
+VALUE:2.2uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C37[C 10uF]
+1[=AGND]
+2[=AVDD]
+VALUE:10uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:C0603
+#
+
+/C38[C]
+1[A=AGND]
+2[B=DVDD]
+VALUE:2.2uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C39[C]
+1[A=AGND]
+2[B=RAW]
+VALUE:2.2uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/C40[C]
+1[A=AGND]
+2[B=DVDD]
+VALUE:2.2uF
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:EIA_0402
+#
+
+/CONN1[SEEEDmicroSD]
+2[CS=CS3]
+3[MOSI=MOSI]
+4[VDD=DVDD]
+5[SCLK=SCLK]
+6[GND=AGND]
+7[MISO=MISO]
+12[GND=AGND]
+13[GND=AGND]
+14[GND=AGND]
+15[GND=AGND]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:MISC
+#
+
+/D1[DI0603]
+1[=PGD]
+2[=N0959]
+VALUE:BLUE LED
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/D2[Quad TVS TPD4E1B06]
+1[IO1=1P]
+2[1O2=SRB2]
+3[GND=AGND]
+4[IO3=AVSS]
+5[IO4=SRB1]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/D3[Quad TVS TPD4E1B06]
+1[IO1=3P]
+2[1O2=2N]
+3[GND=AGND]
+4[IO3=1N]
+5[IO4=2P]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/D4[Quad TVS TPD4E1B06]
+1[IO1=5P]
+2[1O2=4N]
+3[GND=AGND]
+4[IO3=3N]
+5[IO4=4P]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/D5[Quad TVS TPD4E1B06]
+1[IO1=7P]
+2[1O2=6N]
+3[GND=AGND]
+4[IO3=5N]
+5[IO4=6P]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/D6[Quad TVS TPD4E1B06]
+2[1O2=8N]
+3[GND=AGND]
+4[IO3=7N]
+5[IO4=8P]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/D7[Quad TVS TPD4E1B06]
+1[IO1=AGND]
+2[1O2=AVDD]
+3[GND=AGND]
+4[IO3=BIAS]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/D8[DI0603]
+1[=BLE Enable]
+2[=3V Enable]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/D9[DI0603]
+1[=N0081]
+2[=RAW]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/D10[R]
+1[A=RF_IO4]
+2[B=AGND]
+VALUE:220K
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:0402
+#
+
+/J1[PINHEAD-8]
+1[=DVDD]
+2[=AGND]
+3[=MISO]
+4[=SCLK]
+5[=RESET]
+6[=CLK]
+7[=MOSI]
+8[=CS2]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SIP
+#
+
+/J2[2WP]
+1[A=AGND]
+2[B=BIAS_INV]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:DSC
+#
+
+/J3[4WP]
+1[A=D13]
+2[B=PGC]
+3[C=DVDD]
+4[D=AGND]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:DSC
+#
+
+/J4[4WP]
+1[A=BOOT_EN]
+2[B=MCLR]
+3[C=D18]
+4[D=PGD]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:DSC
+#
+
+/PL1[26WDP]
+1[A=AVDD]
+2[A=AVDD]
+3[B=AGND]
+4[B=AGND]
+5[C=BIAS]
+6[C=BIAS]
+7[D=8N]
+8[D=8P]
+9[E=7N]
+10[E=7P]
+11[F=6N]
+12[F=6P]
+13[G=5N]
+14[G=5P]
+15[H=4N]
+16[H=4P]
+17[I=3N]
+18[I=3P]
+19[J=2N]
+20[J=2P]
+21[K=1N]
+22[K=1P]
+23[L=SRB2]
+24[L=SRB1]
+25[M=AVSS]
+26[M=AVSS]
+Height:2.5
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+_DESTPACK:DSC
+#
+
+/PL2[SMT_QUAD_04]
+1[=AGND]
+2[=RF_RESET]
+3[=RF_RXD]
+4[=RF_TXD]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/R1[CAY16-F4 R-ARRAY]
+1[=1N]
+2[=1P]
+3[=SRB2]
+4[=SRB1]
+5[=_SRB1]
+6[=_SRB2]
+7[=IN1P]
+8[=IN1N]
+VALUE:2.2K
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/R2[CAY16-F4 R-ARRAY]
+1[=3N]
+2[=3P]
+3[=2N]
+4[=2P]
+5[=IN2P]
+6[=IN2N]
+7[=IN3P]
+8[=IN3N]
+VALUE:2.2K
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/R3[CAY16-F4 R-ARRAY]
+1[=5N]
+2[=5P]
+3[=4N]
+4[=4P]
+5[=IN4P]
+6[=IN4N]
+7[=IN5P]
+8[=IN5N]
+VALUE:2.2K
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/R4[CAY16-F4 R-ARRAY]
+1[=7N]
+2[=7P]
+3[=6N]
+4[=6P]
+5[=IN6P]
+6[=IN6N]
+7[=IN7P]
+8[=IN7N]
+VALUE:2.2K
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/R5[R]
+1[A=BIAS_DRV]
+2[B=BIAS_OUT]
+VALUE:1M
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:0402
+#
+
+/R6[CAY16-F4 R-ARRAY]
+1[=BIAS]
+2[=AGND]
+3[=8N]
+4[=8P]
+5[=IN8P]
+6[=IN8N]
+7[=AGND]
+8[=BIAS_DRV]
+VALUE:2.2K
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/R7[R]
+1[A=MCLR]
+2[B=DVDD]
+VALUE:470K
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:0402
+#
+
+/R8[R]
+1[A=AGND]
+2[B=N0959]
+VALUE:1K
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:0402
+#
+
+/R9[R]
+1[A=AGND]
+2[B=BOOT_EN]
+VALUE:470K
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:0402
+#
+
+/R10[R]
+1[A=AGND]
+2[B=RF_IO4]
+VALUE:330K
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:0402
+#
+
+/R11[R]
+1[A=BLE Enable]
+2[B=RF_IO4]
+VALUE:330K
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:0402
+#
+
+/SW1[SW_TACT]
+1[=DVDD]
+2[=DVDD]
+3[=BOOT_EN]
+4[=BOOT_EN]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:PTS810 TACT SWITCH
+#
+
+/SW2[CUS-3B SP3T SLIDE SWITCH]
+1[T1=3V Enable]
+2[T2=RAW]
+3[P=RAW]
+4[T3=BLE Enable]
+#7[=AGND]
+#8[=AGND]
+#9[=AGND]
+#10[=AGND]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/SW3[SW_TACT]
+1[=AGND]
+2[=AGND]
+4[=MCLR]
+3[=MCLR]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:PTS810 TACT SWITCH
+#
+
+/U1[LIS3DHTR ACCELEROMETER]
+1[Vdd_IO=DVDD]
+4[SCK=SCLK]
+5[GND=AGND]
+6[MOSI=N0635]
+7[MISO=MISO]
+8[CS=CS4]
+10[RES=AGND]
+11[INT1=INT1]
+12[GND=AGND]
+14[Vdd=DVDD]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:LGA
+#
+
+/U2[SN74LVC1G32DCKR OR_GATE]
+1[A=MOSI]
+2[B=CS4]
+3[GND=AGND]
+4[Y=N0635]
+5[Vcc=DVDD]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/U3[LM2664]
+1[GND=AGND]
+2[OUT=-RAW]
+3[CAP-=N0136]
+4[SD=DVDD]
+5[V+=DVDD]
+6[CAP+=N0135]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+_DESTPACK:SOT-23-6
+#
+
+/U4[TLV700xx LDO REG]
+1[IN=DVDD]
+2[GND=AGND]
+3[EN=DVDD]
+5[OUT=AVDD]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SOT23-5
+#
+
+/U5[LP5907]
+1[VIN=RAW]
+2[GND=AGND]
+3[EN=3V Enable]
+5[OUT=DVDD]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+
+/U6[ADS1299]
+1[IN8N=IN8N]
+2[IN8P=IN8P]
+3[IN7N=IN7N]
+4[IN7P=IN7P]
+5[IN6N=IN6N]
+6[IN6P=IN6P]
+7[IN5N=IN5N]
+8[IN5P=IN5P]
+9[IN4N=IN4N]
+10[IN4P=IN4P]
+11[IN3N=IN3N]
+12[IN3P=IN3P]
+13[IN2N=IN2N]
+14[IN2P=IN2P]
+15[IN1N=IN1N]
+16[IN1P=IN1P]
+17[SRB1=_SRB1]
+18[SRB2=_SRB2]
+19[AVDD=AVDD]
+20[AVSS=AVSS]
+21[AVDD=AVDD]
+22[AVDD=AVDD]
+23[AVSS=AVSS]
+24[VREFP=N0148]
+25[VREFN=AVSS]
+26[VCAP4=N0093]
+27[NC=NC]
+28[VCAP1=N0092]
+29[NC=NC]
+30[VCAP2=N0091]
+31[RESV1=AGND]
+32[AVSS=AVSS]
+33[DGND=AGND]
+34[D_IN=MOSI]
+35[/PWDN=DVDD]
+36[/RESET=RESET]
+37[CLK=CLK]
+39[/CS=CS1]
+40[SCLK=SCLK]
+41[DAISY_IN=AGND]
+43[DOUT=MISO]
+47[/DRDY=DRDY]
+48[DVDD=DVDD]
+49[DGND=AGND]
+50[DVDD=DVDD]
+51[DGND=AGND]
+52[CLKSEL=DVDD]
+53[AVSS_1=AVSS]
+54[AVDD_1=AVDD]
+55[VCAP3=N0013]
+56[AVDD=AVDD]
+57[AVSS=AVSS]
+58[AVSS=AVSS]
+59[AVDD=AVDD]
+60[BIAS_REF=AGND]
+61[BIAS_INV=BIAS_INV]
+62[BIAS_IN=BIAS_OUT]
+63[BIAS_OUT=BIAS_OUT]
+64[RESERVED=AGND]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+_DESTPACK:TQFP-64
+#
+
+/U7[PIC32MX250F128B]
+1[MCLR=MCLR]
+2[D9=DRDY]
+3[D10=MOSI]
+4[D11=PGD]
+5[D12=PGC]
+6[D13=D13]
+7[D14=TXD]
+8[GND=AGND]
+9[D15=N0999]
+10[D16=N1000]
+11[D17=BOOT_EN]
+12[D18=D18]
+13[Vdd=DVDD]
+14[D0=INT1]
+15[Vbus=DVDD]
+16[D1=CS4]
+17[D2=CS3]
+18[D3=CS2]
+19[GND=AGND]
+20[Vcap=N0997]
+21[D4=RESET]
+22[D5=MISO]
+23[Vdd=DVDD]
+24[D6=RXD]
+25[D7=SCLK]
+26[D8=CS1]
+27[GND=AGND]
+28[Vdd=DVDD]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SSOP
+#
+
+/VR1[TPS72325]
+1[GND=AGND]
+2[IN=-RAW]
+3[EN=-RAW]
+4[NR=N0067]
+5[OUT=AVSS]
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+_DESTPACK:SM
+#
+
+/X1[ABRACON_XTAL]
+1[=N1000]
+#2[=AGND]
+3[=N0999]
+#4[=AGND]
+VALUE:8MHz
+Manufacturer_Part_Number:
+Manufacturer_Name:
+RS Part Number:
+Allied_Number:
+Other Part Number:
+3D Package:
+Height:
+_DESTPACK:SM
+#
+

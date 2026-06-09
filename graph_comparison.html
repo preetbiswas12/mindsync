@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signal Fidelity Comparison | MindSync</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #030308;
+      --surface: rgba(15, 15, 30, 0.45);
+      --surface-hover: rgba(25, 25, 45, 0.6);
+      --border: rgba(255, 255, 255, 0.05);
+      --t1: #f3f3fb;
+      --t2: rgba(243, 243, 251, 0.65);
+      --t3: rgba(243, 243, 251, 0.35);
+      --clean: #22f5a0;
+      --dirty: #ff4b6e;
+      --accent: #7c6ff7;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t1);}
+    body{font-family:'Inter',sans-serif;display:flex;flex-direction:column;}
+    ::-webkit-scrollbar{width:6px;height:6px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:4px;}
+
+    /* ── Glass Panel ── */
+    .glass{
+      background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+      border:1px solid var(--border);border-radius:16px;
+      box-shadow:0 8px 32px 0 rgba(0,0,0,0.4);
+    }
+
+    /* ── Header ── */
+    .hdr{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 28px;height:64px;
+      background:rgba(3,3,8,0.7);backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);z-index:10;flex-shrink:0;
+    }
+    .logo-row{display:flex;align-items:center;gap:12px;}
+    .logo-icon{
+      width:36px;height:36px;border-radius:10px;
+      background:linear-gradient(135deg,var(--accent),#00d4ff);
+      display:flex;align-items:center;justify-content:center;font-size:17px;
+    }
+    .logo-title{font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;letter-spacing:-0.3px;}
+    .subtitle{font-size:10px;color:var(--t3);font-family:'Outfit',sans-serif;letter-spacing:1.5px;text-transform:uppercase;margin-top:1px;}
+    .hdr-btns{display:flex;align-items:center;gap:10px;}
+
+    /* ── Buttons ── */
+    .btn{
+      display:inline-flex;align-items:center;gap:7px;
+      padding:8px 16px;border-radius:9px;border:1px solid var(--border);
+      font:600 12px 'Outfit',sans-serif;cursor:pointer;
+      transition:all 0.2s;white-space:nowrap;color:var(--t1);
+    }
+    .btn-green{background:rgba(34,245,160,0.08);color:var(--clean);border-color:rgba(34,245,160,0.25);}
+    .btn-green:hover{background:rgba(34,245,160,0.18);box-shadow:0 0 16px rgba(34,245,160,0.2);}
+    .btn-red{background:rgba(255,75,110,0.08);color:var(--dirty);border-color:rgba(255,75,110,0.25);}
+    .btn-red:hover{background:rgba(255,75,110,0.18);box-shadow:0 0 16px rgba(255,75,110,0.2);}
+    .btn-ghost{background:rgba(255,255,255,0.03);color:var(--t2);}
+    .btn-ghost:hover{background:rgba(255,255,255,0.07);color:#fff;}
+
+    /* ── Main Layout ── */
+    .main{
+      flex:1;display:flex;flex-direction:column;
+      gap:16px;padding:16px;min-height:0;overflow:hidden;
+    }
+
+    /* ── Graph Panel ── */
+    .panel{
+      display:flex;flex-direction:column;overflow:hidden;min-height:0;
+      padding:0;flex:1;
+    }
+    .panel-hdr{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:12px 18px;border-bottom:1px solid var(--border);
+      background:rgba(255,255,255,0.015);flex-shrink:0;
+    }
+    .panel-title{display:flex;align-items:center;gap:10px;}
+    .badge{
+      display:inline-flex;align-items:center;gap:5px;
+      padding:4px 10px;border-radius:999px;font-size:10px;font-weight:700;
+      letter-spacing:0.8px;text-transform:uppercase;font-family:'Outfit',sans-serif;
+      border:1px solid;
+    }
+    .badge-clean{color:var(--clean);border-color:rgba(34,245,160,0.3);background:rgba(34,245,160,0.08);}
+    .badge-dirty{color:var(--dirty);border-color:rgba(255,75,110,0.3);background:rgba(255,75,110,0.08);}
+    .status{
+      display:flex;align-items:center;gap:6px;
+      font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--t3);
+    }
+    .dot{width:6px;height:6px;border-radius:50%;background:#333;transition:all 0.3s;}
+    .dot.on{background:var(--clean);box-shadow:0 0 8px rgba(34,245,160,0.5);}
+    .dot.pulse{background:var(--accent);animation:blink 1s infinite;}
+    .dot.wait{background:var(--dirty);animation:blink 0.6s infinite;}
+    @keyframes blink{50%{opacity:0.2;}}
+
+    /* ── Canvas ── */
+    .canvas-wrap{
+      flex:1;width:100%;position:relative;overflow:hidden;
+      background:rgba(2,2,6,0.5);min-height:0;
+    }
+    canvas{display:block;width:100%;height:100%;}
+
+    /* ── Stats Grid ── */
+    .stats{
+      display:grid;grid-template-columns:repeat(6,1fr);
+      gap:1px;background:var(--border);border-top:1px solid var(--border);flex-shrink:0;
+    }
+    .stat-cell{
+      background:rgba(13,13,27,0.5);padding:10px 14px;
+      display:flex;flex-direction:column;gap:3px;
+    }
+    .stat-lbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;font-weight:600;}
+    .stat-val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--t1);}
+
+    /* ── Noise Indicator ── */
+    .noise-indicator{
+      display:flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:8px;border:1px solid rgba(255,75,110,0.3);
+      background:rgba(255,75,110,0.06);margin-right:auto;
+    }
+    .noise-bar{
+      width:80px;height:6px;border-radius:3px;
+      background:rgba(255,255,255,0.1);position:relative;overflow:hidden;
+    }
+    .noise-fill{
+      height:100%;background:linear-gradient(90deg,var(--clean),var(--dirty));
+      border-radius:3px;transition:width 0.2s;
+    }
+  </style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="logo-row">
+    <div class="logo-icon">📊</div>
+    <div>
+      <div class="logo-title">Dual Signal Comparison</div>
+      <div class="subtitle">Clean vs Noisy/Delayed — Overlay View</div>
+    </div>
+  </div>
+  <div class="hdr-btns">
+    <button class="btn btn-green" onclick="document.getElementById('file1').click()">📂 Load Pure Dataset</button>
+    <input type="file" id="file1" accept=".txt,.csv" style="display:none" onchange="loadFile(event)">
+    <button class="btn btn-ghost" onclick="stopAll()">⏹ Stop</button>
+  </div>
+</header>
+
+<div class="main">
+  <div class="panel glass">
+    <div class="panel-hdr">
+      <div class="panel-title">
+        <span class="badge badge-clean">✅ Clean Signal</span>
+        <span class="badge badge-dirty">⚠️ Noisy + 1s Delay</span>
+        <span style="font-size:11px;color:var(--t3);font-family:'Outfit',sans-serif;margin-left:12px;">Real-time overlay comparison</span>
+      </div>
+      <div class="status">
+        <span class="dot" id="dot1"></span>
+        <span id="txt1">Waiting for CSV</span>
+      </div>
+    </div>
+    
+    <div class="canvas-wrap">
+      <canvas id="canvas1"></canvas>
+    </div>
+    
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;background:rgba(255,255,255,0.008);border-top:1px solid var(--border);">
+      <div class="noise-indicator">
+        <span style="font-size:9px;color:var(--t3);text-transform:uppercase;font-weight:700;font-family:'Outfit',sans-serif;">Noise Level</span>
+        <div class="noise-bar">
+          <div class="noise-fill" id="noiseBar"></div>
+        </div>
+        <span id="noiseVal" style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--dirty);min-width:35px;">0%</span>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-cell">
+        <span class="stat-lbl">Elapsed</span>
+        <span class="stat-val" id="sTime1">00:00</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-lbl">Samples</span>
+        <span class="stat-val" id="sSamp1">0</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-lbl">Clean RMS</span>
+        <span class="stat-val" id="sRmsClean">—</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-lbl">Noisy RMS</span>
+        <span class="stat-val" id="sRmsDirty">—</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-lbl">SNR</span>
+        <span class="stat-val" id="sSNR">—</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-lbl">Threshold</span>
+        <span class="stat-val" style="color:var(--accent)">38</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   RING BUFFER
+══════════════════════════════════════════════════════════════════════════ */
+const MAX_BUF = 8192;
+class Ring {
+  constructor(size) { this.buf = new Float32Array(size); this.len = 0; this.ptr = 0; }
+  push(val) {
+    this.buf[this.ptr] = val;
+    this.ptr = (this.ptr + 1) % this.buf.length;
+    this.len = Math.min(this.len + 1, this.buf.length);
+  }
+  at(i) {
+    if(i < 0 || i >= this.len) return 0;
+    return this.buf[(this.ptr - this.len + i + this.buf.length) % this.buf.length];
+  }
+  clear() { this.len = 0; this.ptr = 0; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ENGINE STATE
+══════════════════════════════════════════════════════════════════════════ */
+const engine = {
+  ctx: null, W: 0, H: 0,
+  clean: new Ring(MAX_BUF), dirty: new Ring(MAX_BUF),
+  simMode: false, simDataRows: [], simIdx: 0,
+  simInterval: null, sampleCount: 0,
+  sessionStart: null,
+  rmsClean: 0, rmsCleanCount: 0,
+  rmsDirty: 0, rmsDirtyCount: 0,
+  noiseLevel: 0
+};
+
+function gaussianNoise(mean, stdev) {
+  let u1 = Math.random(), u2 = Math.random();
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2) * stdev + mean;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CANVAS SETUP
+══════════════════════════════════════════════════════════════════════════ */
+function initCanvas() {
+  const canvas = document.getElementById('canvas1');
+  if(!canvas) return console.error('Canvas not found');
+  
+  const wrap = canvas.parentElement;
+  engine.ctx = canvas.getContext('2d');
+  
+  function resize() {
+    canvas.width = wrap.clientWidth;
+    canvas.height = wrap.clientHeight;
+    engine.W = canvas.width;
+    engine.H = canvas.height;
+    console.log('Canvas resized:', engine.W, 'x', engine.H);
+  }
+  
+  resize();
+  window.addEventListener('resize', resize);
+}
+
+// Initialize immediately
+if(document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCanvas);
+} else {
+  initCanvas();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PARSE ROWS
+══════════════════════════════════════════════════════════════════════════ */
+function parseRows(lines) {
+  const rows = [];
+  
+  // Detect if it's a CSV with headers
+  const firstLine = lines[0]?.trim() || '';
+  const isCSV = firstLine.includes(',') || firstLine.toLowerCase().includes('raweeg') || firstLine.toLowerCase().includes('timestamp');
+  
+  let rawEEGIndex = -1;
+  let startIdx = 0;
+  
+  if(isCSV) {
+    // Parse header to find RawEEG column
+    const headers = firstLine.split(',').map(h => h.trim().toLowerCase());
+    rawEEGIndex = headers.findIndex(h => h.includes('raweeg') || h.includes('raw'));
+    
+    if(rawEEGIndex === -1) {
+      // If no exact match, try column C (index 2)
+      rawEEGIndex = 2;
+    }
+    
+    startIdx = 1; // Skip header row
+    
+    // Parse CSV data
+    for(let i = startIdx; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if(!line) continue;
+      
+      const parts = line.split(',').map(p => p.trim());
+      if(parts.length > rawEEGIndex) {
+        const raw = parseFloat(parts[rawEEGIndex]);
+        if(isFinite(raw)) rows.push({kind:'raw', raw});
+      }
+    }
+  } else {
+    // Original simple format (one value per line)
+    for(let line of lines) {
+      line = line.trim();
+      if(!line) continue;
+      const m = line.match(/Raw\s*Value:\s*(-?\d+(?:\.\d+)?)/i) || line.match(/(-?\d+(?:\.\d+)?)/);
+      if(!m) continue;
+      const raw = parseFloat(m[1]);
+      if(isFinite(raw)) rows.push({kind:'raw', raw});
+    }
+  }
+  
+  return rows;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   FILE LOADING
+══════════════════════════════════════════════════════════════════════════ */
+function loadFile(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.split('\n');
+    startEngine(lines);
+  };
+  reader.readAsText(file);
+}
+
+function startEngine(lines) {
+  stopEngine();
+
+  const rows = parseRows(lines);
+  if(!rows.length) {
+    setStatus('', 'Parse failed — no valid samples');
+    return;
+  }
+
+  engine.simMode = true;
+  engine.simDataRows = rows;
+  engine.simIdx = 0;
+  engine.sampleCount = 0;
+  engine.sessionStart = Date.now();
+  engine.rmsClean = 0;
+  engine.rmsCleanCount = 0;
+  engine.rmsDirty = 0;
+  engine.rmsDirtyCount = 0;
+  engine.clean.clear();
+  engine.dirty.clear();
+
+  const intervalMs = 1000 / 256;
+
+  // Start clean stream immediately
+  setStatus('on', 'STREAMING clean');
+  engine.simInterval = setInterval(() => tick(), intervalMs);
+}
+
+function tick() {
+  if(engine.simIdx >= engine.simDataRows.length) { 
+    stopEngine(); 
+    setStatus('', 'Complete');
+    return; 
+  }
+
+  let raw = engine.simDataRows[engine.simIdx++].raw;
+
+  // Push clean sample
+  engine.clean.push(raw);
+  engine.rmsClean += raw * raw;
+  engine.rmsCleanCount++;
+
+  // Delayed noisy sample (1 second = ~256 samples)
+  const DELAY_SAMPLES = 256;
+  if(engine.sampleCount >= DELAY_SAMPLES) {
+    const idx = engine.simIdx - (DELAY_SAMPLES + 1);
+    if(idx >= 0 && idx < engine.simDataRows.length) {
+      let dirtyRaw = engine.simDataRows[idx].raw;
+      // Add 40% Gaussian noise
+      dirtyRaw = dirtyRaw + gaussianNoise(0, Math.abs(dirtyRaw) * 0.4);
+      engine.dirty.push(dirtyRaw);
+      engine.rmsDirty += dirtyRaw * dirtyRaw;
+      engine.rmsDirtyCount++;
+      
+      // Calculate noise level - compare clean vs noisy
+      const cleanVal = engine.simDataRows[idx].raw;
+      const noiseVal = Math.abs(dirtyRaw - cleanVal);
+      const avgAbsVal = (Math.abs(cleanVal) + Math.abs(dirtyRaw)) / 2;
+      // Always calculate noise, don't gate it on threshold
+      engine.noiseLevel = avgAbsVal > 0.1 ? (noiseVal / avgAbsVal) * 100 : 0;
+    }
+  }
+
+  engine.sampleCount++;
+
+  // Update stats every 32 samples
+  if(engine.sampleCount % 32 === 0) {
+    document.getElementById('sSamp1').textContent = engine.sampleCount.toLocaleString();
+    
+    const rmsClean = Math.sqrt(engine.rmsClean / Math.max(engine.rmsCleanCount, 1));
+    const rmsDirty = Math.sqrt(engine.rmsDirty / Math.max(engine.rmsDirtyCount, 1));
+    
+    document.getElementById('sRmsClean').textContent = rmsClean.toFixed(2);
+    document.getElementById('sRmsDirty').textContent = rmsDirty.toFixed(2);
+    
+    const snr = rmsDirty > 0 ? (rmsClean / rmsDirty).toFixed(2) : '—';
+    document.getElementById('sSNR').textContent = snr;
+    
+    document.getElementById('noiseVal').textContent = engine.noiseLevel.toFixed(1) + '%';
+    document.getElementById('noiseBar').style.width = Math.min(engine.noiseLevel, 100) + '%';
+    
+    updateTime();
+  }
+}
+
+function updateTime() {
+  if(!engine.sessionStart) return;
+  const s = Math.floor((Date.now() - engine.sessionStart) / 1000);
+  document.getElementById('sTime1').textContent =
+    String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+}
+
+function stopEngine() {
+  if(engine.simInterval){ clearInterval(engine.simInterval); engine.simInterval = null; }
+  engine.simMode = false;
+}
+
+function stopAll() {
+  stopEngine();
+  setStatus('', 'Stopped');
+}
+
+function setStatus(dotClass, txt) {
+  document.getElementById('dot1').className = 'dot ' + dotClass;
+  document.getElementById('txt1').textContent = txt;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CANVAS DRAWING — dual waveform overlay
+══════════════════════════════════════════════════════════════════════════ */
+const WAVE_COLOR_CLEAN = '#22f5a0';
+const WAVE_COLOR_DIRTY = '#ff4b6e';
+const GRID_COLOR = 'rgba(255,255,255,0.03)';
+const GRID_CENTER = 'rgba(255,255,255,0.06)';
+
+function drawWaveform() {
+  const { ctx, W, H, clean, dirty } = engine;
+  
+  if(!ctx || !W || !H) return; // Safety check
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background grid
+  ctx.strokeStyle = GRID_COLOR;
+  ctx.lineWidth = 1;
+  for(let y = H*0.1; y < H; y += H*0.1){
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+  }
+  for(let x = W*0.1; x < W; x += W*0.1){
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+  }
+
+  // Center line
+  ctx.strokeStyle = GRID_CENTER;
+  ctx.setLineDash([4,6]);
+  ctx.beginPath(); ctx.moveTo(0, H/2); ctx.lineTo(W, H/2); ctx.stroke();
+  ctx.setLineDash([]);
+
+  const Nclean = Math.min(clean.len, W * 2);
+  const Ndirty = Math.min(dirty.len, W * 2);
+  const N = Math.max(Nclean, Ndirty);
+
+  if(N < 2){
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '400 16px Inter,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('📂 Load a CSV file to start', W/2, H/2 - 20);
+    ctx.font = '400 12px Inter,sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    ctx.fillText('Upload pure dataset to compare clean vs noisy signals', W/2, H/2 + 10);
+    return;
+  }
+
+  // Auto-scale
+  let maxA = 0.5;
+  for(let i = Math.max(0, clean.len - N); i < clean.len; i++){
+    const a = Math.abs(clean.at(i));
+    if(a > maxA) maxA = a;
+  }
+  for(let i = Math.max(0, dirty.len - N); i < dirty.len; i++){
+    const a = Math.abs(dirty.at(i));
+    if(a > maxA) maxA = a;
+  }
+  const scale = (H * 0.42) / Math.max(maxA, 0.5);
+  const midY = H / 2;
+
+  // Draw clean signal (filled area + line)
+  drawSignal(ctx, clean, N, WAVE_COLOR_CLEAN, scale, midY, W, H, false);
+
+  // Draw dirty signal (filled area + line)
+  drawSignal(ctx, dirty, N, WAVE_COLOR_DIRTY, scale, midY, W, H, true);
+
+  // Legend
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.font = '500 10px JetBrains Mono,monospace';
+  ctx.textAlign = 'right';
+  ctx.fillText(`Clean: ${clean.len} | Noisy: ${dirty.len} samples`, W - 10, H - 8);
+  
+  // Visual legend in top-left
+  ctx.font = 'bold 12px Inter,sans-serif';
+  ctx.textAlign = 'left';
+  
+  // Green label
+  ctx.fillStyle = WAVE_COLOR_CLEAN;
+  ctx.fillText('● PURE SIGNAL', 20, 30);
+  
+  // Red label
+  ctx.fillStyle = WAVE_COLOR_DIRTY;
+  ctx.fillText('● NOISY + DELAYED', 20, 55);
+}
+
+function drawSignal(ctx, ring, N, color, scale, midY, W, H, isDirty) {
+  const startIdx = Math.max(0, ring.len - N);
+
+  // Filled area
+  ctx.beginPath();
+  ctx.moveTo(0, midY);
+  for(let i = 0; i < N; i++){
+    const x = (i / (N - 1)) * W;
+    const y = midY - ring.at(startIdx + i) * scale;
+    ctx.lineTo(x, y);
+  }
+  ctx.lineTo(W, midY);
+  ctx.closePath();
+
+  const r = parseInt(color.slice(1,3),16), g = parseInt(color.slice(3,5),16), b = parseInt(color.slice(5,7),16);
+  ctx.fillStyle = `rgba(${r},${g},${b},0.06)`;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  for(let i = 0; i < N; i++){
+    const x = (i / (N - 1)) * W;
+    const y = midY - ring.at(startIdx + i) * scale;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.shadowColor = color;
+  ctx.shadowBlur = isDirty ? 6 : 8;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = isDirty ? 1.5 : 2.0;
+  ctx.globalAlpha = isDirty ? 0.7 : 1.0;
+  ctx.stroke();
+  ctx.globalAlpha = 1.0;
+  ctx.shadowBlur = 0;
+
+  // Glow dot at end
+  if(ring.len > 0) {
+    const lastY = midY - ring.at(ring.len - 1) * scale;
+    ctx.beginPath();
+    ctx.arc(W, lastY, isDirty ? 2 : 3, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(W, lastY, isDirty ? 6 : 8, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${r},${g},${b},${isDirty ? 0.15 : 0.2})`;
+    ctx.fill();
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ANIMATION LOOP
+══════════════════════════════════════════════════════════════════════════ */
+function loop() {
+  if(engine.ctx && engine.W && engine.H) {
+    drawWaveform();
+  }
+  requestAnimationFrame(loop);
+}
+
+// Start loop after short delay to ensure canvas is ready
+setTimeout(() => {
+  console.log('Starting animation loop');
+  loop();
+}, 100);
+
+</script>
+</body>
+</html>

@@ -1019,7 +1019,7 @@ function updatePower(){
 /* ══════════════════════════════════════════════════════════════════════════
    FILE SIMULATION ENGINE
 ══════════════════════════════════════════════════════════════════════════ */
-let simMode=false, simInterval=null, simDataRows=[], simIdx=0, simArtifactCount=0;
+let simMode=false, simInterval=null, simDataRows=[], simIdx=0, simArtifactCount=0, burstTimer=null;
 const MIN_VALID=20, MAX_VALID=1003;
 let lastGoodSim=512, medBufSim=[512,512,512], medIdxSim=0;
 function medianFilterSim(v){
@@ -1048,21 +1048,55 @@ function parseSimulationInput(lines){
   if(!trimmed.length)return[];
   const header=trimmed[0].replace(/^\uFEFF/,'');
   const lowerHeader=header.toLowerCase();
-  const isCsvLike=header.includes(',')&&(lowerHeader.includes('raweeg')||lowerHeader.includes('delta')||lowerHeader.includes('alpha'));
-  if(isCsvLike){
+
+  // \u2500\u2500 Detect CSV with band columns (header contains commas + band keywords) \u2500\u2500
+  const hasBandHeader=header.includes(',')&&BANDS.some(b=>lowerHeader.includes(b.key));
+  if(hasBandHeader){
     const cols=header.split(',').map(c=>c.trim().toLowerCase());
     const idx=k=>cols.indexOf(k);
+    // Find the raw signal column: accept 'raweeg','raw','raweeg','eeg','raw_signal','adc'
+    const rawAliases=['raweeg','raw','eeg','raw_signal','adc','signal'];
+    const rawColIdx=rawAliases.map(a=>idx(a)).find(i=>i>=0);
     const rows=[];
     for(let i=1;i<trimmed.length;i++){
       const parts=trimmed[i].split(',').map(p=>p.trim());
-      const raw=parseFloat(parts[idx('raweeg')]); if(!isFinite(raw))continue;
+      // Parse band values
       const delta=parseFloat(parts[idx('delta')]),theta=parseFloat(parts[idx('theta')]);
       const alpha=parseFloat(parts[idx('alpha')]),beta=parseFloat(parts[idx('beta')]),gamma=parseFloat(parts[idx('gamma')]);
-      if([delta,theta,alpha,beta,gamma].every(Number.isFinite)) rows.push({kind:'bands',raw,bands:{delta,theta,alpha,beta,gamma}});
-      else rows.push({kind:'raw',raw});
+      if([delta,theta,alpha,beta,gamma].every(Number.isFinite)){
+        // Has all band values \u2014 use them; raw is optional (synthesise if missing)
+        let raw;
+        if(rawColIdx!==undefined&&rawColIdx>=0&&rawColIdx<parts.length){
+          const rv=parseFloat(parts[rawColIdx]); raw=isFinite(rv)?rv:(delta+theta+alpha+beta+gamma);
+        } else { raw=delta+theta+alpha+beta+gamma; }
+        rows.push({kind:'bands',raw,bands:{delta,theta,alpha,beta,gamma}});
+      } else {
+        // Not a full band row \u2014 treat as raw if there's a numeric column
+        if(rawColIdx!==undefined&&rawColIdx>=0&&rawColIdx<parts.length){
+          const raw=parseFloat(parts[rawColIdx]); if(isFinite(raw))rows.push({kind:'raw',raw});
+        }
+      }
     }
-    return rows;
+    if(rows.length)return rows;
   }
+
+  // \u2500\u2500 Detect multi-column numeric CSV (no band keywords but comma-separated numbers) \u2500\u2500
+  if(header.includes(',')){
+    const firstCols=header.split(',').map(c=>c.trim());
+    // Check if the first row is purely numeric (data, not header)
+    const allNumeric=firstCols.every(c=>isFinite(parseFloat(c)));
+    if(allNumeric){
+      // No header row at all \u2014 all rows are data, first column is the raw signal
+      const rows=[];
+      for(const line of trimmed){
+        const parts=line.split(',').map(p=>p.trim());
+        const raw=parseFloat(parts[0]); if(isFinite(raw))rows.push({kind:'raw',raw});
+      }
+      if(rows.length)return rows;
+    }
+  }
+
+  // \u2500\u2500 Detect single-column or serial-style text (one value per line) \u2500\u2500
   const rows=[];
   for(const line of trimmed){
     const match=line.match(/Raw\s*Value:\s*(-?\d+(?:\.\d+)?)/i)||line.match(/(-?\d+(?:\.\d+)?)/);
@@ -1084,25 +1118,76 @@ function startSimulation(lines){
   sessionArcHistory.length=0; lastArcLabel='';
   document.getElementById('sArt').textContent='0';
   document.getElementById('simBtn').textContent='⏹ Stop Simulation';
-  setStatus('on','SIMULATING · File Active');
+  setStatus('pulse','Buffering… 1s delay');
   document.getElementById('recBtn').disabled=false;
   const intervalMs=1000/256;
-  simInterval=setInterval(()=>{
-    if(simIdx>=simDataRows.length){ stopSimulation(); setStatus('','Simulation Complete'); return; }
-    const row=simDataRows[simIdx++];
-    if(row.kind==='bands'){ onSample(row.raw,row.bands); return; }
-    const rawVal=row.raw;
-    const artifact=(rawVal<MIN_VALID||rawVal>MAX_VALID);
-    const adc=artifact?lastGoodSim:rawVal;
-    if(!artifact)lastGoodSim=adc;
-    if(artifact){ simArtifactCount++; document.getElementById('sArt').textContent=simArtifactCount.toLocaleString(); }
-    const med=medianFilterSim(adc);
-    const filtered=EEGFilterSim(med);
-    onLine(filtered);
-  },intervalMs);
+
+  // ── 1 second startup delay before streaming samples ──
+  setTimeout(()=>{
+    if(!simMode)return; // user stopped during delay
+    setStatus('on','SIMULATING · File Active + 40% noise');
+
+    // ── Burst/Pause cycle: 1 second of data, then 1 second idle, repeat ──
+    // The simulation file has continuous data — we just gate it through
+    // a 50% duty-cycle window so the dashboard sees 1s on, 1s off.
+    const BURST_MS = 1000;
+    const PAUSE_MS = 1000;
+    let burstActive = true;
+    burstTimer = null;
+
+    function startBurst(){
+      burstActive = true;
+      setStatus('on','SIMULATING · Streaming + 40% noise');
+      simInterval=setInterval(()=>{
+        if(simIdx>=simDataRows.length){ stopSimulation(); setStatus('','Simulation Complete'); return; }
+        const row=simDataRows[simIdx++];
+        if(row.kind==='bands'){
+          // Add 40% noise to each band value
+          const noisyBands={};
+          Object.keys(row.bands).forEach(k=>{ noisyBands[k]=row.bands[k]+gaussianNoise(0,Math.abs(row.bands[k])*0.4); });
+          onSample(row.raw+gaussianNoise(0,Math.abs(row.raw)*0.4),noisyBands);
+          return;
+        }
+        const rawVal=row.raw;
+        const artifact=(rawVal<MIN_VALID||rawVal>MAX_VALID);
+        const adc=artifact?lastGoodSim:rawVal;
+        if(!artifact)lastGoodSim=adc;
+        if(artifact){ simArtifactCount++; document.getElementById('sArt').textContent=simArtifactCount.toLocaleString(); }
+        const med=medianFilterSim(adc);
+        const filtered=EEGFilterSim(med);
+        // Add 40% noise to the filtered sample
+        const noisyFiltered=filtered+gaussianNoise(0,Math.abs(filtered)*0.4);
+        onLine(noisyFiltered);
+      },intervalMs);
+    }
+
+    function stopBurst(){
+      burstActive = false;
+      if(simInterval){ clearInterval(simInterval); simInterval=null; }
+      setStatus('pulse','SIMULATING · 1s pause');
+    }
+
+    // Kick off the first burst immediately
+    startBurst();
+
+    // Alternate burst/pause every 1 second
+    burstTimer = setInterval(()=>{
+      if(!simMode){ clearInterval(burstTimer); return; }
+      if(burstActive){ stopBurst(); } else { startBurst(); }
+    }, BURST_MS);
+
+  },1000);
+}
+
+// Box-Muller transform for Gaussian noise
+function gaussianNoise(mean=0,stddev=1){
+  const u1=Math.random(),u2=Math.random();
+  const z=Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);
+  return mean+z*stddev;
 }
 function stopSimulation(){
   if(simInterval){clearInterval(simInterval);simInterval=null;}
+  if(burstTimer){clearInterval(burstTimer);burstTimer=null;}
   if(simMode){simMode=false;document.getElementById('simBtn').textContent='📂 Load simulation file';document.getElementById('fileInput').value='';}
 }
 
